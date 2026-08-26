@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lotus Hotels · Guest Atelier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B241F; --ink-2:#103029; --ink-soft:#1c4339;
+    --brass:#A77A2D; --brass-2:#8a6323; --gold:#c8a45c;
+    --aubergine:#5E3446; --rose:#b76e79;
+    --ivory:#FBF4E6; --cream:#f3ecdb; --paper:#fffdf7; --card:#fffefb;
+    --line:rgba(11,36,31,.15); --line-2:rgba(11,36,31,.08);
+    --muted:#5c6a62; --text:#1f2f2a;
+    --shadow:0 1px 2px rgba(11,36,31,.05),0 16px 34px -22px rgba(11,36,31,.45);
+    --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Georgia,serif;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:var(--sans);color:var(--text);background:var(--cream);
+    background-image:radial-gradient(1100px 560px at 88% -12%,rgba(167,122,45,.12),transparent 60%),
+                     radial-gradient(820px 480px at -12% 112%,rgba(11,36,31,.12),transparent 55%);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{display:grid;grid-template-rows:auto 1fr;height:100vh;min-height:0}
+
+  /* Header */
+  header.top{display:flex;align-items:center;gap:18px;padding:13px 24px;
+    background:linear-gradient(175deg,var(--ink),var(--ink-2));color:var(--ivory);
+    border-bottom:1px solid rgba(167,122,45,.32)}
+  .brand{display:flex;align-items:center;gap:13px}
+  .lotus{color:var(--brass);width:36px;height:36px;flex:0 0 auto}
+  .brand h1{font-family:var(--serif);font-weight:600;font-size:23px;letter-spacing:.4px;margin:0;line-height:1}
+  .brand .sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(251,244,230,.62);margin-top:4px}
+  .metrics{margin-left:auto;display:flex;gap:24px;align-items:center}
+  .metric{text-align:right;position:relative}
+  .metric+.metric{padding-left:24px;border-left:1px solid rgba(167,122,45,.25)}
+  .metric .v{font-family:var(--serif);font-size:21px;color:#fff;line-height:1;font-weight:600}
+  .metric .v .a{color:var(--brass);font-size:13px}
+  .metric .l{font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;color:rgba(251,244,230,.55);margin-top:5px}
+  .gear{margin-left:6px;background:rgba(255,255,255,.06);border:1px solid rgba(167,122,45,.4);color:var(--ivory);
+    width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+  .gear:hover{background:rgba(167,122,45,.22)}
+
+  .main{display:grid;grid-template-columns:290px 1fr 360px;min-height:0;overflow:hidden}
+  .rail{overflow-y:auto;padding:20px 16px;background:rgba(255,253,247,.5)}
+  .rail.left{border-right:1px solid var(--line)}
+  .rail.right{border-left:1px solid var(--line)}
+  .overline{font-size:10px;letter-spacing:2.2px;text-transform:uppercase;color:var(--brass-2);font-weight:700;margin:2px 4px 13px;
+    display:flex;align-items:center;gap:9px}
+  .overline::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--brass),transparent)}
+
+  /* Roster dossier cards */
+  .gcard{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:13px;margin-bottom:11px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;
+    transition:transform .12s,border-color .12s,box-shadow .12s;position:relative}
+  .gcard:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .gcard.active{border-color:var(--brass)}
+  .gcard.active::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--brass)}
+  .avatar{width:42px;height:42px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:17px;font-weight:600;color:#fff;letter-spacing:.5px}
+  .gcard .nm{font-weight:650;font-size:14.5px;line-height:1.15;color:var(--ink)}
+  .gcard .meta{font-size:12px;color:var(--muted);margin-top:3px}
+  .tier{display:inline-flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.7px;text-transform:uppercase;
+    font-weight:700;margin-top:8px;padding:2px 9px;border-radius:999px}
+  .tier .dot{width:6px;height:6px;border-radius:50%}
+  .tier.lotus{background:rgba(167,122,45,.15);color:var(--brass-2)}
+  .tier.blossom{background:rgba(94,52,70,.13);color:var(--aubergine)}
+  .tier.petal{background:rgba(11,36,31,.09);color:var(--ink-soft)}
+  .gcard.walkin{border-style:dashed;background:transparent}
+  .gcard.walkin .avatar{background:var(--ink-soft) !important;font-size:20px}
+
+  .scn{font-size:12.5px;color:var(--muted);line-height:1.5;padding:7px 9px;border-radius:8px;cursor:pointer}
+  .scn:hover{background:rgba(167,122,45,.08);color:var(--ink)}
+  .scn b{color:var(--brass-2);font-weight:700}
+
+  /* Console */
+  .console{display:flex;flex-direction:column;min-height:0;background:var(--paper);position:relative}
+  .stream{flex:1;overflow-y:auto;padding:26px 34px 8px}
+
+  /* Curtain / 23% hero */
+  .curtain{max-width:520px;margin:26px auto;text-align:center}
+  .curtain .big{font-family:var(--serif);font-size:78px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-1px}
+  .curtain .big small{font-size:30px;color:var(--brass);vertical-align:super}
+  .curtain .lead{font-size:15px;color:var(--muted);line-height:1.6;margin:14px auto 24px;max-width:420px}
+  .curtain .lead b{color:var(--ink)}
+  .cta{background:var(--ink);color:var(--ivory);border:none;border-radius:12px;padding:14px 26px;font-size:14px;font-weight:600;
+    font-family:var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+  .cta:hover{background:var(--ink-soft)}
+  .cta .pl{color:var(--brass);font-size:17px}
+
+  .msg{display:flex;gap:12px;margin:18px 0;max-width:780px}
+  .msg .who{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;color:#fff}
+  .msg.user{justify-content:flex-end;margin-left:auto}
+  .msg.user .bubble{background:var(--ink);color:var(--ivory);border-radius:14px 14px 4px 14px;max-width:520px}
+  .msg.user .who{background:var(--ink-soft);order:2}
+  .bubble{background:var(--card);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:14px 17px;
+    box-shadow:var(--shadow);font-size:14.5px;line-height:1.58}
+  .bubble.ai .who-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--brass-2);font-weight:700;
+    margin-bottom:8px;display:flex;align-items:center;gap:9px}
+  .badge{font-size:9px;letter-spacing:.8px;padding:2px 8px;border-radius:999px;background:rgba(11,36,31,.08);color:var(--ink-soft);font-weight:700;text-transform:uppercase}
+  .badge.live{background:rgba(167,122,45,.2);color:var(--brass-2)}
+  .bubble b{color:var(--ink);font-weight:650}
+  .bubble i{color:var(--ink-soft)}
+
+  .siren{display:flex;gap:9px;align-items:center;background:rgba(183,110,121,.12);border:1px solid rgba(183,110,121,.4);
+    border-radius:9px;padding:9px 12px;margin:10px 0 4px;font-size:12.8px;color:#8f4650;font-weight:600}
+  .siren .ic{width:16px;height:16px;flex:0 0 auto}
+
+  .recs{display:grid;gap:9px;margin-top:12px}
+  .rec{border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:9px;padding:11px 13px;background:var(--paper)}
+  .rec .rt{font-weight:650;font-size:13.5px;color:var(--ink);display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .rec .rt .pill{font-size:10px;letter-spacing:.3px;color:var(--muted);font-weight:600;white-space:nowrap}
+  .rec .rt .val{color:var(--brass-2);font-weight:700}
+  .rec .rb{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .rec .tags{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
+  .rtag{font-size:10px;letter-spacing:.2px;padding:2px 8px;border-radius:999px;background:rgba(11,36,31,.06);color:var(--ink-soft)}
+  .signals{margin-top:12px;border-top:1px solid var(--line-2);padding-top:10px}
+  .signals .sk{color:var(--brass-2);font-weight:700;letter-spacing:.6px;text-transform:uppercase;font-size:9.5px;margin-bottom:6px}
+  .signals .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .sig{font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(167,122,45,.1);color:var(--brass-2);border:1px solid rgba(167,122,45,.22)}
+
+  /* Composer */
+  .composer{border-top:1px solid var(--line);padding:14px 26px 18px;background:var(--paper)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .chip{font-size:12.5px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);
+    padding:8px 13px;border-radius:9px;cursor:pointer;transition:all .12s;font-family:var(--sans)}
+  .chip:hover{border-color:var(--brass);color:var(--ink);background:#fff}
+  .inbox{display:flex;gap:10px;align-items:flex-end}
+  .inbox textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-family:var(--sans);
+    font-size:14.5px;line-height:1.4;min-height:50px;max-height:130px;background:#fff;color:var(--text)}
+  .inbox textarea:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(167,122,45,.14)}
+  .send{background:var(--ink);color:var(--ivory);border:none;border-radius:12px;padding:0 22px;height:50px;font-size:14px;
+    font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--sans)}
+  .send:hover{background:var(--ink-soft)}
+  .ctx{font-size:11.5px;color:var(--muted);margin:10px 4px 0;display:flex;align-items:center;gap:6px}
+  .ctx b{color:var(--ink-soft)}
+
+  /* Right panel */
+  .bloom{background:linear-gradient(170deg,var(--ink),var(--ink-2));color:var(--ivory);border-radius:14px;padding:15px 16px;margin-bottom:16px}
+  .bloom .bh{display:flex;justify-content:space-between;align-items:baseline}
+  .bloom .bl{font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(251,244,230,.6);font-weight:700}
+  .bloom .bs{font-family:var(--serif);font-size:26px;font-weight:700;color:#fff}
+  .bloom .track{height:7px;border-radius:7px;background:rgba(251,244,230,.14);margin-top:10px;overflow:hidden}
+  .bloom .fill{height:100%;width:23%;border-radius:7px;background:linear-gradient(90deg,var(--brass),var(--gold));transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+  .bloom .cap{font-size:11px;color:rgba(251,244,230,.6);margin-top:9px;line-height:1.4}
+
+  .profile-hd{display:flex;gap:13px;align-items:center;margin-bottom:6px}
+  .profile-hd .avatar{width:48px;height:48px;border-radius:13px;font-size:18px}
+  .profile-hd .nm{font-family:var(--serif);font-size:21px;color:var(--ink);font-weight:600;line-height:1.05}
+  .profile-hd .pm{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .occasion{margin:13px 0 16px;padding:11px 13px;border-radius:11px;
+    background:linear-gradient(180deg,rgba(167,122,45,.15),rgba(167,122,45,.05));border:1px solid rgba(167,122,45,.32)}
+  .occasion .ol{font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--brass-2);font-weight:700}
+  .occasion .ov{font-size:13.5px;color:var(--ink);margin-top:3px;font-weight:600}
+  .pblock{margin-bottom:16px}
+  .pblock h4{font-size:10px;letter-spacing:1.7px;text-transform:uppercase;color:var(--brass-2);margin:0 0 9px;font-weight:700}
+  .krow{display:flex;justify-content:space-between;gap:12px;font-size:12.8px;padding:5px 0;border-bottom:1px solid var(--line-2)}
+  .krow:last-child{border-bottom:none}
+  .krow .k{color:var(--muted)}
+  .krow .val{color:var(--ink);font-weight:550;text-align:right}
+  .taglist{display:flex;flex-wrap:wrap;gap:6px}
+  .flag{font-size:11.5px;padding:3px 9px;border-radius:7px;font-weight:600}
+  .flag.warn{background:rgba(183,110,121,.14);color:#8f4650;border:1px solid rgba(183,110,121,.3)}
+  .flag.love{background:rgba(11,36,31,.07);color:var(--ink-soft)}
+  .notes{list-style:none;margin:0;padding:0}
+  .notes li{font-size:12px;color:var(--muted);line-height:1.45;padding:6px 0;border-bottom:1px dashed var(--line-2)}
+  .notes li:last-child{border-bottom:none}
+  .notes li .src{font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--brass-2);font-weight:700;margin-right:6px}
+
+  .prep{background:var(--ink);color:var(--ivory);border-radius:14px;padding:15px 16px;margin-top:4px}
+  .prep h4{color:var(--brass);font-size:10px;letter-spacing:1.7px;text-transform:uppercase;margin:0 0 11px}
+  .prep .pitem{display:flex;gap:10px;align-items:flex-start;font-size:12.6px;line-height:1.4;padding:8px 0;border-bottom:1px solid rgba(251,244,230,.09);cursor:pointer}
+  .prep .pitem:last-of-type{border-bottom:none}
+  .prep .box{width:16px;height:16px;border:1.5px solid var(--brass);border-radius:4px;flex:0 0 auto;margin-top:1px;position:relative;transition:.15s}
+  .prep .pitem.done .box{background:var(--brass)}
+  .prep .pitem.done .box::after{content:"";position:absolute;left:4.5px;top:1px;width:4px;height:8px;border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .prep .pitem.done .ptext{opacity:.5;text-decoration:line-through}
+  .prep .owner{font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--brass);font-weight:700;margin-top:3px}
+  .actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+  .qa{flex:1;min-width:92px;background:rgba(251,244,230,.08);border:1px solid rgba(167,122,45,.3);color:var(--ivory);
+    font-size:11.5px;font-weight:600;padding:8px 6px;border-radius:8px;cursor:pointer;font-family:var(--sans)}
+  .qa:hover{background:rgba(167,122,45,.22)}
+
+  /* Walk-in intake */
+  .intake .fld{margin-bottom:12px}
+  .intake label{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--brass-2);font-weight:700;margin-bottom:6px}
+  .intake select,.intake input{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:13px;font-family:var(--sans);background:#fff}
+  .checks{display:flex;flex-wrap:wrap;gap:7px}
+  .check{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;user-select:none;background:#fff}
+  .check.on{background:var(--ink);color:var(--ivory);border-color:var(--ink)}
+
+  /* Settings drawer */
+  .scrim{position:fixed;inset:0;background:rgba(11,36,31,.42);backdrop-filter:blur(2px);display:none;z-index:40}
+  .scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:384px;max-width:92vw;background:var(--paper);z-index:50;
+    transform:translateX(100%);transition:transform .25s ease;box-shadow:-20px 0 50px -20px rgba(0,0,0,.4);padding:26px;overflow-y:auto}
+  .drawer.open{transform:translateX(0)}
+  .drawer h3{font-family:var(--serif);font-size:23px;color:var(--ink);margin:0 0 5px;font-weight:600}
+  .drawer p.d{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0 0 18px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--brass-2);font-weight:700;margin-bottom:6px}
+  .field input,.field select{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13.5px;font-family:var(--sans);background:#fff}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--brass)}
+  .row{display:flex;gap:10px}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .btn.primary{background:var(--ink);color:var(--ivory);flex:1}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink-soft)}
+  .status-line{font-size:12px;margin-top:10px;padding:9px 12px;border-radius:9px;background:rgba(11,36,31,.07);color:var(--ink-soft)}
+  .status-line.live{background:rgba(167,122,45,.16);color:var(--brass-2);font-weight:600}
+  .hint{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.45}
+
+  .typing{display:inline-flex;gap:4px;padding:2px 0}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--brass);animation:bl 1s infinite}
+  .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+  @keyframes bl{0%,60%,100%{opacity:.25}30%{opacity:1}}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--ivory);
+    padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shadow);opacity:0;transition:.25s;z-index:60;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:1180px){.main{grid-template-columns:250px 1fr 320px}.metrics{gap:16px}.metric+.metric{padding-left:16px}}
+  @media (max-width:980px){.main{grid-template-columns:1fr}.rail{display:none}.metrics{display:none}}
+  ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{background:rgba(11,36,31,.18);border-radius:9px}
+  /* ---- presentation polish & bells ---- */
+  .present-btn{margin-left:6px;width:132px;justify-content:center;background:var(--brass);color:#221604;border:1px solid rgba(255,255,255,.16);
+    height:38px;border-radius:10px;cursor:pointer;font-size:12.5px;font-weight:700;letter-spacing:.4px;font-family:var(--sans);
+    display:flex;align-items:center;gap:7px;box-shadow:0 6px 16px -10px rgba(167,122,45,.9)}
+  .present-btn:hover{filter:brightness(1.06)}
+  .present-btn.on{background:var(--aubergine);color:#fff;border-color:rgba(255,255,255,.2)}
+  .msg{animation:rise .32s cubic-bezier(.22,1,.36,1) both}
+  .recs .rec{animation:rise .34s cubic-bezier(.22,1,.36,1) both}
+  .recs .rec:nth-child(2){animation-delay:.06s}
+  .recs .rec:nth-child(3){animation-delay:.12s}
+  .recs .rec:nth-child(4){animation-delay:.18s}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .bloom.pulse .bs{animation:pop .42s cubic-bezier(.22,1,.36,1)}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.06);color:var(--gold)}100%{transform:scale(1)}}
+  .present-banner{position:fixed;top:86px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:35;opacity:0;
+    background:var(--ivory);color:var(--ink);border:1px solid rgba(167,122,45,.55);padding:7px 18px;border-radius:999px;
+    font-size:12px;font-weight:600;letter-spacing:.4px;transition:.3s;pointer-events:none;box-shadow:var(--shadow)}
+  .present-banner .d{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--brass);margin-right:9px;animation:halo 1.8s ease infinite}
+  @keyframes halo{0%{box-shadow:0 0 0 0 rgba(167,122,45,.5)}70%{box-shadow:0 0 0 6px rgba(167,122,45,0)}100%{box-shadow:0 0 0 0 rgba(167,122,45,0)}}
+  .present-banner.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .impact{margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .impact .ik{color:#2e6b4f;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:9.5px}
+  .impact .imp{font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(46,107,79,.1);color:#2e6b4f;border:1px solid rgba(46,107,79,.25)}
+  button.scn{background:none;border:none;width:100%;text-align:left;font-family:var(--sans);cursor:pointer}
+  button.check{font-family:var(--sans);font-size:12px;color:var(--text)}
+  .kbd-hint{font-size:10.5px;color:var(--muted);margin-top:12px;padding:0 4px;line-height:1.7}
+  .kbd-hint kbd{background:rgba(11,36,31,.07);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:var(--sans);font-size:10px;color:var(--ink-soft)}
+  a:focus-visible,button:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="lotus" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M24 39c0-9 0-16 0-24"/>
+          <path d="M24 39c-6-3.5-9-9-10-16 5 2 8.5 7 10 16z"/>
+          <path d="M24 39c6-3.5 9-9 10-16-5 2-8.5 7-10 16z"/>
+          <path d="M24 39c-8-1.5-13-5-16-11 6-.5 12 2.5 16 11z"/>
+          <path d="M24 39c8-1.5 13-5 16-11-6-.5-12 2.5-16 11z"/>
+          <path d="M13 34c4 1.5 8 3 11 5 3-2 7-3.5 11-5" opacity=".5"/>
+        </g>
+      </svg>
+      <div><h1>Lotus Hotels</h1><div class="sub">Guest Atelier</div></div>
+    </div>
+    <div class="metrics" id="metrics"></div>
+    <button class="present-btn" id="presentBtn" aria-label="Run guided demo">&#9654; Begin demo</button>
+    <button class="gear" id="gear" title="Connect a live model" aria-label="Settings">&#9881;</button>
+  </header>
+
+  <div class="main">
+    <aside class="rail left">
+      <div class="overline">Arrivals Today</div>
+      <div id="roster"></div>
+      <button class="gcard walkin" id="walkinBtn">
+        <div class="avatar">+</div>
+        <div><div class="nm">Walk-in / unknown</div><div class="meta">Capture prefs on the spot</div></div>
+      </button>
+      <div class="overline" style="margin-top:22px">Try These</div>
+      <div id="scenarioList"></div>
+      <div class="kbd-hint">Shortcuts &nbsp;<kbd>1</kbd>&ndash;<kbd>5</kbd> scenarios &nbsp;·&nbsp; <kbd>P</kbd> present &nbsp;·&nbsp; <kbd>W</kbd> walk-in &nbsp;·&nbsp; <kbd>Esc</kbd> stop</div>
+    </aside>
+
+    <section class="console">
+      <div class="stream" id="stream"></div>
+      <div class="composer">
+        <div class="chips" id="chips"></div>
+        <div class="inbox">
+          <textarea id="input" aria-label="Ask about the selected guest" placeholder="Ask about the selected guest&hellip;" rows="1"></textarea>
+          <button class="send" id="send">Ask <span aria-hidden="true">&rarr;</span></button>
+        </div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+    </section>
+
+    <aside class="rail right" id="profilePanel"></aside>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Live model settings">
+  <h3>Live Model</h3>
+  <p class="d">The Atelier runs an on-device reasoning engine &mdash; no key needed, works offline. Optionally connect Azure OpenAI or OpenAI to route answers through a live model; guest data stays in the request only.</p>
+  <div class="field"><label>Provider</label>
+    <select id="provider">
+      <option value="local">On-device engine (default, offline)</option>
+      <option value="openai">OpenAI</option>
+      <option value="azure">Azure OpenAI</option>
+    </select></div>
+  <div class="field"><label>API Key</label><input id="apiKey" type="password" placeholder="sk-&hellip; / Azure key" /></div>
+  <div id="azureFields" style="display:none">
+    <div class="field"><label>Azure Endpoint</label><input id="azEndpoint" placeholder="https://xxx.openai.azure.com" /></div>
+    <div class="field"><label>Deployment</label><input id="azDeploy" placeholder="gpt-4o" /></div>
+  </div>
+  <div class="field" id="modelField"><label>Model</label><input id="model" placeholder="gpt-4o-mini" value="gpt-4o-mini" /></div>
+  <div class="row"><button class="btn primary" id="saveCfg">Save</button><button class="btn ghost" id="clearCfg">Clear key</button><button class="btn ghost" id="closeCfg">Close</button></div>
+  <div class="status-line" id="cfgStatus">Status: on-device engine active.</div>
+  <div class="hint">Keys are held for this browser session only (never written to disk) and sent solely to the provider you pick &mdash; Azure endpoints are validated to <code>*.openai.azure.com</code>. If a live call fails or CORS blocks it, the Atelier falls back to the on-device engine so the demo never breaks.</div>
+</div>
+<div class="present-banner" id="presentBanner"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================ DATA ============================ */
+const GUESTS = [
+  {
+    id:"sarah", name:"Sarah Chen", initials:"SC", tier:"lotus", color:"#1c4339", score:96,
+    matchKeys:["sarah","chen"],
+    property:{name:"Lotus SoHo", city:"New York"}, memberSince:2019, visits:14,
+    occasion:"5th wedding anniversary &mdash; arriving with spouse", occasionKey:"anniversary",
+    room:{floor:"High floor, skyline view", temp:"66&deg;F (cool)", bed:"King, extra down pillows",
+      extras:["Blackout drapes","Sparkling water stocked","Late checkout requested"]},
+    dietary:{restrictions:["Pescatarian"], loves:["Italian","Wine","Fresh seafood"], avoid:["Cilantro"], strict:false},
+    interests:["Spa","Art galleries","Wine","Live jazz"],
+    notes:[
+      {src:"Stay note · Mar '26", t:"Asked to move off the 12th floor &mdash; street noise. Prefers high &amp; quiet since."},
+      {src:"Loyalty · Apr '26", t:"Redeemed anniversary offer via email; spouse name on file as \u2018Dani\u2019."},
+      {src:"Open follow-up", t:"Confirm late checkout with housekeeping &mdash; not yet guaranteed."}
+    ],
+    signals:["14 stays","pescatarian flag","anniversary booking","Mar '26 quiet-floor note","late-checkout request"]
+  },
+  {
+    id:"marcus", name:"Marcus Bell", initials:"MB", tier:"blossom", color:"#5E3446", score:88,
+    matchKeys:["marcus","bell"],
+    property:{name:"Lotus Loop", city:"Chicago"}, memberSince:2022, visits:6,
+    occasion:"Business trip &mdash; two nights, back-to-back meetings", occasionKey:"business",
+    room:{floor:"Low floor, away from elevator (quiet)", temp:"70&deg;F", bed:"King, firm mattress",
+      extras:["Early check-in (11am)","Large work desk","Extra hangers"]},
+    dietary:{restrictions:["Gluten-free (celiac)"], loves:["Italian","Pour-over coffee","Steak"], avoid:["Gluten &mdash; strict, celiac"], strict:true},
+    interests:["Early running","Fitness center","Live sports","Craft cocktails"],
+    notes:[
+      {src:"Stay note · Jan '26", t:"Celiac &mdash; flagged a near-miss with shared fryer oil last visit. Kitchen must confirm."},
+      {src:"Desk · recurring", t:"Always requests express checkout; invoices to \u2018Bell &amp; Ridge LLP.\u2019"},
+      {src:"Open follow-up", t:"Wi-Fi dropped in room 412 last stay &mdash; assign a different low-floor room."}
+    ],
+    signals:["celiac &mdash; strict","6 stays","early check-in","fryer-oil near-miss (Jan '26)","express-checkout habit"]
+  },
+  {
+    id:"okafor", name:"The Okafor Family", initials:"OK", tier:"petal", color:"#8a6323", score:84,
+    matchKeys:["okafor","okafors","amara","david"],
+    property:{name:"Lotus Embarcadero", city:"San Francisco"}, memberSince:2023, visits:3,
+    occasion:"Summer family vacation &mdash; Amara &amp; David + kids (4 &amp; 7)", occasionKey:"family",
+    room:{floor:"Low floor, near elevator", temp:"72&deg;F (warm)", bed:"Two queens + crib &amp; rollaway",
+      extras:["Connecting rooms guaranteed","Childproofing","Milk in fridge"]},
+    dietary:{restrictions:["Nut allergy (child) &mdash; strict","Vegetarian (Amara)"], loves:["Kid menus","Pasta","Pancakes"], avoid:["Tree nuts &amp; peanuts"], strict:true},
+    interests:["Family attractions","Aquarium","Easy walks","Pool","Early dinners"],
+    notes:[
+      {src:"Stay note · Jul '25", t:"Youngest has a tree-nut &amp; peanut allergy &mdash; EpiPen on file. Zero-nut kitchens only."},
+      {src:"Desk · Jul '25", t:"Kids loved welcome cookies; asked about stroller rental (we had none &mdash; source one)."},
+      {src:"Open follow-up", t:"Connecting rooms essential &mdash; last trip they were split. Do not repeat."}
+    ],
+    signals:["nut allergy &mdash; strict","EpiPen on file","family of 4","connecting-rooms issue (Jul '25)","stroller request"]
+  }
+];
+
+const CATALOG = [
+  // New York
+  {city:"New York",cat:"dining",name:"Vespera",tags:["italian","seafood","pescatarian","romantic","wine"],blurb:"Candlelit coastal-Italian a block away; celebrated crudo and hand-rolled pastas.",meta:"4 min walk · $$$"},
+  {city:"New York",cat:"dining",name:"The Terrace (on-property)",tags:["italian","pescatarian","romantic","wine","onprop"],blurb:"Rooftop sunset seating with a pescatarian tasting menu.",meta:"On-property · $$$"},
+  {city:"New York",cat:"dining",name:"Marea Room",tags:["seafood","pescatarian","romantic"],blurb:"Intimate 10-seat counter &mdash; ideal for a milestone dinner.",meta:"7 min walk · $$$$"},
+  {city:"New York",cat:"attraction",name:"After-hours gallery walk",tags:["art","romantic","walkable"],blurb:"Self-guided route past six galleries open late Thursdays.",meta:"Steps away"},
+  {city:"New York",cat:"attraction",name:"Cellar jazz set",tags:["jazz","romantic","nightlife"],blurb:"Reserved balcony two-top for the 10:30 set.",meta:"12 min ride"},
+  {city:"New York",cat:"spa",name:"Lotus Spa · Couples Ritual",tags:["spa","romantic","onprop"],blurb:"90-minute couples treatment with a private soaking tub.",meta:"On-property"},
+  // Chicago
+  {city:"Chicago",cat:"dining",name:"Senza",tags:["italian","gluten-free","steak"],blurb:"Dedicated gluten-free Italian kitchen &mdash; zero cross-contact.",meta:"5 min walk · $$$"},
+  {city:"Chicago",cat:"dining",name:"The Ridge Chophouse",tags:["steak","gluten-free","business"],blurb:"Classic steakhouse with a marked GF menu; good for hosting clients.",meta:"8 min walk · $$$$"},
+  {city:"Chicago",cat:"dining",name:"Juniper Counter (on-property)",tags:["coffee","gluten-free","onprop","business"],blurb:"Lobby pour-over bar with labeled GF pastries for early departures.",meta:"On-property · $"},
+  {city:"Chicago",cat:"attraction",name:"Lakefront sunrise 5K",tags:["fitness","running","walkable"],blurb:"Pre-mapped loop from the door; towel service on return.",meta:"At the door"},
+  {city:"Chicago",cat:"attraction",name:"Arena game night",tags:["sports","nightlife"],blurb:"Lower-level seats plus a car held for the post-game return.",meta:"15 min ride"},
+  {city:"Chicago",cat:"fitness",name:"Lotus Fitness · 24h",tags:["fitness","business","onprop"],blurb:"Round-the-clock gym; reserve a bike for 6am.",meta:"On-property"},
+  // San Francisco
+  {city:"San Francisco",cat:"dining",name:"Trattoria Bambini",tags:["italian","nut-free","family","kids","vegetarian","early-dining"],blurb:"Family trattoria with a certified nut-free kitchen and a kids' pasta bar.",meta:"6 min walk · $$"},
+  {city:"San Francisco",cat:"dining",name:"Family Table (on-property)",tags:["family","kids","nut-free","vegetarian","onprop","early-dining"],blurb:"5:30 family seating; allergy-aware chef check-in at the table.",meta:"On-property · $$"},
+  {city:"San Francisco",cat:"attraction",name:"Bay Aquarium early entry",tags:["aquarium","kids","family","walkable"],blurb:"Before-crowds admission; stroller-friendly route.",meta:"10 min walk"},
+  {city:"San Francisco",cat:"attraction",name:"Waterfront carousel stroll",tags:["family","kids","walkable","easy"],blurb:"Flat, easy loop with a carousel stop &mdash; back before nap time.",meta:"Steps away"},
+  {city:"San Francisco",cat:"attraction",name:"Rooftop family pool hour",tags:["pool","kids","family","onprop"],blurb:"Reserved 3&ndash;4pm slot with floats and a lifeguard on deck.",meta:"On-property"}
+];
+
+const METRICS = [
+  {v:"4.7",a:"&#9650;",l:"Guest Sat"},
+  {v:"+18%",a:"",l:"Direct Bookings"},
+  {v:"&minus;34%",a:"",l:"Desk Inquiries"},
+  {v:"8s",a:"",l:"Avg Answer"}
+];
+
+/* ============================ ENGINE ============================ */
+const $ = s => document.querySelector(s);
+let activeGuest = GUESTS[0];
+let personalized = false;
+let llm = { provider:"local", key:"", model:"gpt-4o-mini", azEndpoint:"", azDeploy:"" };
+try{ const s=JSON.parse(sessionStorage.getItem("lotus_llm")||"null"); if(s) llm=Object.assign(llm,s); }catch(e){}
+
+function guestFromText(q){
+  const t=" "+q.toLowerCase().replace(/[^a-z\s]/g," ").replace(/\s+/g," ")+" ";
+  for(const g of GUESTS){ if(g.matchKeys.some(k=>t.includes(" "+k+" "))) return g; }
+  return null;
+}
+function primaryIntent(q){
+  const t=q.toLowerCase(); const has=(...w)=>w.some(x=>t.includes(x));
+  if(has("risk","flag","allerg","dietary","celiac","nut allerg")) return "risk";
+  if(has("welcome","amenit","special touch","surprise","upgrade","suite","occasion","anniversary","celebrat","gift","honeymoon","touch")) return "touches";
+  if(has("prep","before arrival","before check","before he","before she","before they","checks in","check-in","check in","arriv","anticipate","get ready","brief")) return "prep";
+  if(has("din","eat","food","restaurant","dinner","lunch","breakfast","gluten","cuisine","italian","menu","coffee","vegetarian")) return "dining";
+  if(has("activit","attraction","things to do","explore","tour","spa","gym","fitness","run","pool","aquarium","nightlife","jazz","sport","family","afternoon","plan","itinerary","kid","walk")) return "activity";
+  if(has("room","prefer","temperature","bed","pillow","floor","view","climate")) return "room";
+  return "overview";
+}
+function scoreItem(item,g,intentTags){
+  let s=0; const gt=new Set(g.prefTags||[]);
+  for(const tag of item.tags){ if(gt.has(tag)) s+=2; if(intentTags.has(tag)) s+=1; }
+  return s;
+}
+function dietaryOk(item,g){
+  const r=(g.dietary.restrictions.join(" ")).toLowerCase();
+  if(item.cat!=="dining") return true;
+  if(r.includes("celiac")||r.includes("gluten")){ if(!item.tags.includes("gluten-free")) return false; }
+  if(r.includes("nut")){ if(!item.tags.includes("nut-free")) return false; }
+  return true;
+}
+function pick(g,cats,intentTags,n){
+  return CATALOG.filter(i=>i.city===g.property.city && cats.includes(i.cat) && dietaryOk(i,g))
+    .map(i=>({i,s:scoreItem(i,g,intentTags)})).sort((a,b)=>b.s-a.s).slice(0,n).map(x=>x.i);
+}
+function recCard(i,val){
+  const tags=i.tags.filter(t=>t!=="onprop").slice(0,4).map(t=>`<span class="rtag">${t.replace(/-/g," ")}</span>`).join("");
+  const v=val?`<span class="val">${val}</span>`:`<span class="pill">${i.meta}</span>`;
+  return `<div class="rec"><div class="rt"><span>${i.name}</span>${v}</div><div class="rb">${i.blurb}</div><div class="tags">${tags}</div></div>`;
+}
+function signalsBlock(list){
+  return `<div class="signals"><div class="sk">Signals used</div><div class="chips">${list.map(s=>`<span class="sig">${s}</span>`).join("")}</div></div>`;
+}
+function stripTags(s){ return s.replace(/<[^>]+>/g,"").replace(/&mdash;/g,"").replace(/&amp;/g,"&"); }
+
+const PREP = {
+  base:g=>[
+    {t:`Set room to <b>${g.room.temp}</b> · ${stripTags(g.room.bed).toLowerCase()}`, o:"Housekeeping"},
+    {t:`Flag kitchen: <b>${stripTags(g.dietary.restrictions.join(", "))}</b>`, o:"Kitchen"},
+  ],
+  anniversary:[{t:"Stage anniversary amenity: chilled prosecco, rose-petal turndown, handwritten card", o:"Concierge"},{t:"Confirm late checkout with housekeeping", o:"Front Desk"}],
+  business:[{t:"Confirm 11am early check-in &amp; desk setup; pre-load express checkout", o:"Front Desk"},{t:"Assign a low-floor room with verified Wi-Fi", o:"Front Desk"}],
+  family:[{t:"Guarantee connecting rooms; crib, rollaway, childproofing, milk in fridge", o:"Housekeeping"},{t:"Source a stroller and hold at the desk", o:"Concierge"}]
+};
+function prepList(g){
+  const items=[...PREP.base(g), ...(PREP[g.occasionKey]||[])];
+  items.push({t:`Greet by name &mdash; ${cap(g.tier)} member, ${g.visits} stays`, o:"Front Desk"});
+  return items;
+}
+function cap(s){ return s? s[0].toUpperCase()+s.slice(1) : s; }
+
+function buildAnswer(query){
+  const named=guestFromText(query); const g=named||activeGuest;
+  const intent=primaryIntent(query);
+  const it=new Set();
+  if(intent==="dining"||intent==="risk") ["italian","gluten-free","nut-free","vegetarian","seafood","steak","coffee"].forEach(x=>it.add(x));
+  if(intent==="activity") ["spa","fitness","running","aquarium","pool","art","jazz","sports","walkable","kids","family"].forEach(x=>it.add(x));
+  let head="",body="",cards="",siren="",sig=g.signals||[];
+
+  if(g.id==="walkin" && !g.built){
+    return {guest:g, html:`I don't have a dossier for this walk-in yet. Capture a few preferences in the panel on the right, and I'll personalize on the spot.`};
+  }
+
+  if(intent==="risk"){
+    const strict=g.dietary.strict;
+    head=`Dietary guardrails for <b>${g.name}</b>:`;
+    body=`<div class="taglist" style="margin:10px 0 2px">${g.dietary.restrictions.map(r=>`<span class="flag warn">${r}</span>`).join("")}</div>`;
+    if(strict) siren=`<div class="siren"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Allergy guardrail active &mdash; dining filtered to ${g.dietary.restrictions.some(r=>/nut/i.test(r))?"nut-free":"gluten-free"} kitchens only.</div>`;
+    const picks=pick(g,["dining"],it,2);
+    cards=picks.length?`<div class="recs">${picks.map(i=>recCard(i)).join("")}</div>`:"";
+    return finalize(g,siren+head+body+cards+impactRow(["Allergy incident avoided","Guest safety"]),sig);
+  }
+  if(intent==="room"){
+    head=`<b>${g.name}</b> &mdash; room preferences:`;
+    body=`<div class="recs">
+      <div class="rec"><div class="rt"><span>Placement &amp; climate</span></div><div class="rb">${g.room.floor} · ${g.room.temp}</div></div>
+      <div class="rec"><div class="rt"><span>Bedding</span></div><div class="rb">${g.room.bed}</div></div>
+      <div class="rec"><div class="rt"><span>Standing extras</span></div><div class="rb">${g.room.extras.join(" · ")}</div></div></div>`;
+    return finalize(g,head+body,sig);
+  }
+  if(intent==="dining"){
+    const picks=pick(g,["dining"],it,3);
+    const guard=g.dietary.strict? (g.dietary.restrictions.some(r=>/nut/i.test(r))?"nut-free kitchens only":"gluten-free kitchens only"):"preference-matched";
+    if(g.dietary.strict) siren=`<div class="siren"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Guardrail: ${guard} in ${g.property.city}.</div>`;
+    head=`Dining for <b>${g.name}</b> &mdash; ${stripTags(g.dietary.restrictions.join(", "))}, loves ${g.dietary.loves.slice(0,2).join(" / ")}:`;
+    cards=`<div class="recs">${picks.map(i=>recCard(i)).join("")}</div>`;
+    return finalize(g,siren+head+cards+impactRow(g.dietary.strict?["Allergy incident avoided","Guest trust"]:["Preference match","Upsell-ready"]),sig);
+  }
+  if(intent==="activity"){
+    const picks=pick(g,["attraction","spa","fitness"],it,3);
+    head=`Curated for <b>${g.name}</b> around ${g.interests.slice(0,3).join(", ")}:`;
+    cards=`<div class="recs">${picks.map(i=>recCard(i)).join("")}</div>`;
+    return finalize(g,head+cards,sig);
+  }
+  if(intent==="touches"){
+    const map={
+      anniversary:[["Suite upgrade on arrival (Lotus tier)","+$140"],["Champagne &amp; rose-petal turndown","+$60"],["Couples spa ritual &amp; late checkout","+$220"],["Reserved rooftop dinner two-top",""]],
+      business:[["Quiet low-floor with verified Wi-Fi + desk",""],["Guaranteed 11am check-in + express checkout",""],["Complimentary pressing, two shirts",""],["Pour-over voucher for early mornings","+$0"]],
+      family:[["Connecting rooms + kids' welcome kit",""],["Nut-free snack basket &amp; milk in fridge",""],["Early family dinner + reserved pool hour","+$45"],["Stroller sourced &amp; held at desk",""]],
+      leisure:[["Room upgrade on arrival","+$90"],["Welcome amenity to taste",""],["Local experiences curated by concierge",""]]
+    }[g.occasionKey]||[["Welcome amenity to taste",""]];
+    head=`Special touches to delight <b>${g.name}</b>:`;
+    cards=`<div class="recs">${map.map(t=>recCard({name:t[0],blurb:"",tags:[],meta:""},t[1])).join("")}</div>`;
+    const rev=map.reduce((a,t)=>a+(parseInt(String(t[1]).replace(/[^0-9]/g,""))||0),0);
+    return finalize(g,head+cards+impactRow([`Est. +$${rev} revenue`,"Loyalty lift"]),sig);
+  }
+  if(intent==="prep"){
+    head=`Pre-arrival brief for <b>${g.name}</b> &mdash; ${g.property.name}:`;
+    body=`<div class="recs">${prepList(g).map(p=>`<div class="rec"><div class="rt"><span>${p.t}</span><span class="pill">${p.o}</span></div></div>`).join("")}</div>`;
+    return finalize(g,head+body+impactRow(["~12 min staff time saved","Fewer desk inquiries"]),sig);
+  }
+  head=`Snapshot of <b>${g.name}</b> &mdash; ${g.property.name}, ${g.property.city}:`;
+  body=`<div class="rb" style="font-size:13.8px;color:var(--text);margin-top:2px">${cap(g.tier)} member · ${g.visits} stays · <i>${g.occasion}</i>. Prefers ${g.room.temp}, ${g.room.floor.toLowerCase()}. ${stripTags(g.dietary.restrictions.join(", "))}; enjoys ${g.interests.slice(0,3).join(", ")}. Ask about dining, activities, room prefs, special touches, risk flags, or pre-arrival prep.</div>`;
+  return finalize(g,head+body,sig);
+}
+function finalize(g,html,sig){ return {guest:g, html: html + signalsBlock(sig)}; }
+function impactRow(list){ return `<div class="impact"><span class="ik">Impact</span>${list.map(s=>`<span class="imp">${s}</span>`).join("")}</div>`; }
+
+/* ============================ LLM (optional) ============================ */
+function guestContext(g){
+  return `Guest: ${stripTags(g.name)} | Tier: ${g.tier} | ${g.property.name}, ${g.property.city} | Visits: ${g.visits}
+Occasion: ${stripTags(g.occasion)} | Room: ${g.room.floor}, ${stripTags(g.room.temp)}, ${stripTags(g.room.bed)}
+Dietary: ${stripTags(g.dietary.restrictions.join(", "))}; loves ${g.dietary.loves.join(", ")}
+Interests: ${g.interests.join(", ")}`;
+}
+async function askLLM(query,g){
+  if(llm.provider==="local"||!llm.key) return null;
+  const sys=`You are the Lotus Hotels Guest Atelier, a staff-facing concierge assistant. Give warm, concise recommendations grounded ONLY in the guest profile. Respect dietary restrictions strictly. End with a one-line "Signals:" list of the profile cues you used.\n\n${guestContext(g)}`;
+  try{
+    let url,headers={"Content-Type":"application/json"},body;
+    if(llm.provider==="openai"){
+      url="https://api.openai.com/v1/chat/completions"; headers["Authorization"]="Bearer "+llm.key;
+      body=JSON.stringify({model:llm.model||"gpt-4o-mini",messages:[{role:"system",content:sys},{role:"user",content:query}],temperature:.6});
+    }else{
+      const ep=(llm.azEndpoint||"").replace(/\/$/,"");
+      if(!/^https:\/\/[a-z0-9-]+\.openai\.azure\.com$/i.test(ep)){ console.warn("Azure endpoint rejected:",ep); return null; }
+      url=`${ep}/openai/deployments/${encodeURIComponent(llm.azDeploy)}/chat/completions?api-version=2024-02-15-preview`;
+      headers["api-key"]=llm.key;
+      body=JSON.stringify({messages:[{role:"system",content:sys},{role:"user",content:query}],temperature:.6});
+    }
+    const r=await fetch(url,{method:"POST",headers,body}); if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json(); return (j.choices&&j.choices[0]&&j.choices[0].message.content)||null;
+  }catch(e){ console.warn("LLM fallback:",e.message); return null; }
+}
+
+/* ============================ RENDER ============================ */
+function avatar(g){ return `<div class="avatar" style="background:${g.color}">${g.initials}</div>`; }
+function escapeHTML(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function addUser(text){
+  const el=document.createElement("div"); el.className="msg user";
+  el.innerHTML=`<div class="bubble">${escapeHTML(text)}</div><div class="who">You</div>`;
+  $("#stream").appendChild(el); scroll();
+}
+function addTyping(){
+  const el=document.createElement("div"); el.className="msg ai"; el.id="typing";
+  el.innerHTML=`<div class="who" style="background:var(--brass)">AI</div><div class="bubble ai"><span class="typing"><span></span><span></span><span></span></span></div>`;
+  $("#stream").appendChild(el); scroll();
+}
+function addAI(html,live){
+  const t=$("#typing"); if(t) t.remove();
+  const el=document.createElement("div"); el.className="msg ai";
+  const badge=live?`<span class="badge live">Live AI</span>`:`<span class="badge">House Notes</span>`;
+  el.innerHTML=`<div class="who" style="background:var(--brass)">AI</div><div class="bubble ai"><div class="who-label">Lotus Atelier ${badge}</div>${html}</div>`;
+  $("#stream").appendChild(el); scroll();
+}
+function scroll(){ const s=$("#stream"); s.scrollTop=s.scrollHeight; }
+
+function renderCurtain(){
+  const g=activeGuest;
+  $("#stream").innerHTML=`<div class="curtain">
+    <div class="big">23<small>%</small></div>
+    <div class="lead">Only <b>23% of guests</b> feel truly recognized &mdash; yet 78% say personalization decides where they book. <b>${stripTags(g.name)}</b> is about to arrive at ${g.property.name}. Let's change the number.</div>
+    <button class="cta" id="personalizeBtn"><span class="pl">&#10022;</span> Personalize ${stripTags(g.name).split(" ")[0]==="The"?"the Okafors":stripTags(g.name).split(" ")[0]}&rsquo;s arrival</button>
+  </div>`;
+  $("#personalizeBtn").onclick=()=>personalizeIntro();
+}
+function personalizeIntro(){
+  personalized=true;
+  $("#stream").innerHTML="";
+  const g=activeGuest;
+  animateBloom(23,g.score);
+  const first0=stripTags(g.name).split(" ")[0]==="The"?"the Okafors":stripTags(g.name).split(" ")[0];
+  setTimeout(()=>toast(`${first0}: 23% \u2192 ${g.score}% personalized`),750);
+  addTyping();
+  setTimeout(()=>{
+    const first=stripTags(g.name).split(" ")[0]==="The"?"the Okafor family":stripTags(g.name).split(" ")[0];
+    const html=`Welcome back &mdash; here's ${first} at a glance, and one thing to get ahead of:
+      <div class="recs" style="margin-top:11px">
+        <div class="rec"><div class="rt"><span>${g.occasion}</span><span class="pill">${cap(g.tier)} · ${g.visits} stays</span></div>
+          <div class="rb">Prefers ${g.room.temp}, ${g.room.floor.toLowerCase()}. ${stripTags(g.dietary.restrictions.join(", "))}.</div></div>
+        <div class="rec" style="border-left-color:var(--aubergine)"><div class="rt"><span>Get ahead of it</span></div>
+          <div class="rb">${g.notes[g.notes.length-1].t}</div></div>
+      </div>${signalsBlock(g.signals)}`;
+    addAI(html,false);
+  },650);
+}
+
+async function ask(query){
+  query=(query||"").trim(); if(!query) return;
+  if(!personalized){ personalized=true; }
+  const cur=$(".curtain"); if(cur) $("#stream").innerHTML="";
+  addUser(query); addTyping();
+  const named=guestFromText(query); if(named && named.id!==activeGuest.id) setActive(named);
+  const g=named||activeGuest;
+  const live=await askLLM(query,g);
+  if(live) addAI(`<div style="white-space:pre-wrap">${live.replace(/</g,"&lt;")}</div>`,true);
+  else addAI(buildAnswer(query).html,false);
+}
+
+/* ---------- roster / panels ---------- */
+function renderMetrics(){ $("#metrics").innerHTML=METRICS.map(m=>`<div class="metric"><div class="v">${m.v}${m.a?`<span class="a">${m.a}</span>`:""}</div><div class="l">${m.l}</div></div>`).join(""); }
+function renderRoster(){
+  $("#roster").innerHTML=GUESTS.map(g=>`<button class="gcard ${g.id===activeGuest.id?'active':''}" data-id="${g.id}">
+    ${avatar(g)}<div><div class="nm">${g.name}</div><div class="meta">${g.property.city} · ${g.visits} stays</div>
+    <span class="tier ${g.tier}"><span class="dot" style="background:${g.color}"></span>${g.tier}</span></div></button>`).join("");
+  document.querySelectorAll("#roster .gcard").forEach(b=>b.onclick=()=>setActive(GUESTS.find(x=>x.id===b.dataset.id)));
+}
+const SCENARIOS=[
+  "What are Sarah&rsquo;s room preferences?",
+  "Recommend gluten-free Italian dining for Marcus.",
+  "Plan a family-friendly afternoon for the Okafors.",
+  "What welcome touch for Sarah&rsquo;s anniversary?",
+  "Anything to prep before Marcus checks in?"
+];
+function renderScenarios(){
+  $("#scenarioList").innerHTML=SCENARIOS.map((s,i)=>`<button type="button" class="scn" data-q="${s.replace(/&rsquo;/g,"'")}"><b>${i+1}.</b> &ldquo;${s}&rdquo;</button>`).join("");
+  document.querySelectorAll(".scn").forEach(el=>el.onclick=()=>ask(el.dataset.q));
+}
+const CHIPS={
+  sarah:["Set her room before arrival","Romantic dinner tonight","Anniversary welcome touch","Dietary risk flags"],
+  marcus:["Prep before check-in","Gluten-free Italian nearby","Morning fitness options","Allergy risk flags"],
+  okafor:["Family-friendly afternoon","Nut-free dining options","Kid amenities to set up","Pre-arrival prep"],
+  walkin:["Dinner options nearby","Things to do","Room preferences","Special touches"]
+};
+function renderChips(){
+  const list=CHIPS[activeGuest.id]||CHIPS.walkin;
+  $("#chips").innerHTML=list.map(c=>`<button class="chip">${c}</button>`).join("");
+  document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>ask(c.textContent));
+}
+function renderCtx(){ $("#ctx").innerHTML=`Active guest: <b>&nbsp;${activeGuest.name}</b>&nbsp;·&nbsp;${activeGuest.property.name||"&mdash;"}`; }
+
+function animateBloom(from,to){
+  const fill=$("#bloomFill"), num=$("#bloomScore"); if(!fill||!num) return;
+  const wrap=fill.closest(".bloom");
+  fill.style.width=from+"%"; num.textContent=from;
+  requestAnimationFrame(()=>{ setTimeout(()=>{ fill.style.width=to+"%";
+    let cur=from; const step=()=>{ cur+=Math.ceil((to-cur)/6); if(cur>=to){ cur=to; if(wrap){ wrap.classList.remove("pulse"); void wrap.offsetWidth; wrap.classList.add("pulse"); } } num.textContent=cur; if(cur<to) setTimeout(step,60); }; step();
+  },60); });
+}
+function renderProfile(){
+  const g=activeGuest;
+  if(g.id==="walkin" && !g.built){ return renderIntake(); }
+  const diet=g.dietary.restrictions.map(r=>`<span class="flag warn">${r}</span>`).join("")+g.dietary.loves.map(l=>`<span class="flag love">${l}</span>`).join("");
+  const notes=(g.notes||[]).map(n=>`<li><span class="src">${n.src}</span>${n.t}</li>`).join("");
+  $("#profilePanel").innerHTML=`
+    <div class="bloom"><div class="bh"><span class="bl">Personalization</span><span class="bs" id="bloomScore">${g.score}</span></div>
+      <div class="track"><div class="fill" id="bloomFill" style="width:${g.score}%"></div></div>
+      <div class="cap">Signals resolved from booking, loyalty, stay notes &amp; feedback.</div></div>
+    <div class="overline">Guest Dossier</div>
+    <div class="profile-hd">${avatar(g)}<div><div class="nm">${g.name}</div><div class="pm">${cap(g.tier)} · member since ${g.memberSince} · ${g.visits} stays</div></div></div>
+    <div class="occasion"><div class="ol">This Stay</div><div class="ov">${g.occasion}</div></div>
+    <div class="pblock"><h4>Room &amp; Climate</h4>
+      <div class="krow"><span class="k">Placement</span><span class="val">${g.room.floor}</span></div>
+      <div class="krow"><span class="k">Temperature</span><span class="val">${g.room.temp}</span></div>
+      <div class="krow"><span class="k">Bedding</span><span class="val">${g.room.bed}</span></div></div>
+    <div class="pblock"><h4>Dietary &amp; Taste</h4><div class="taglist">${diet}</div></div>
+    <div class="pblock"><h4>Interests</h4><div class="taglist">${g.interests.map(i=>`<span class="flag love">${i}</span>`).join("")}</div></div>
+    <div class="pblock"><h4>Stay Notes</h4><ul class="notes">${notes}</ul></div>
+    <div class="prep"><h4>Proactive Pre-Arrival Prep</h4>
+      ${prepList(g).map((p,i)=>`<div class="pitem" role="checkbox" aria-checked="false" tabindex="0" data-i="${i}"><div class="box"></div><div><div class="ptext">${p.t}</div><div class="owner">${p.o}</div></div></div>`).join("")}
+      <div class="actions">
+        <button class="qa" data-a="Kitchen notified of dietary flags">Notify kitchen</button>
+        <button class="qa" data-a="Room marked ready">Mark room ready</button>
+        <button class="qa" data-a="Note logged to guest profile">Log note</button>
+      </div></div>`;
+  document.querySelectorAll(".pitem").forEach(el=>{ const tog=()=>{ const on=el.classList.toggle("done"); el.setAttribute("aria-checked",on?"true":"false"); }; el.onclick=tog; el.onkeydown=e=>{ if(e.key===" "||e.key==="Enter"){ e.preventDefault(); tog(); } }; });
+  document.querySelectorAll(".qa").forEach(el=>el.onclick=()=>toast(el.dataset.a));
+}
+function renderIntake(){
+  $("#profilePanel").innerHTML=`
+    <div class="overline">Walk-in Intake</div>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.5;margin:0 0 14px">No dossier on file. Capture a few preferences and the Atelier personalizes instantly &mdash; turning an unknown guest into a recognized one.</p>
+    <div class="intake">
+      <div class="fld"><label>Property / City</label><select id="wkCity" aria-label="Property or city">
+        <option value="New York">Lotus SoHo · New York</option>
+        <option value="Chicago">Lotus Loop · Chicago</option>
+        <option value="San Francisco">Lotus Embarcadero · San Francisco</option></select></div>
+      <div class="fld"><label>Occasion</label><select id="wkOcc" aria-label="Occasion">
+        <option value="leisure">Leisure</option><option value="anniversary">Anniversary / romance</option>
+        <option value="business">Business</option><option value="family">Family</option></select></div>
+      <div class="fld"><label id="wkDietLbl">Dietary needs</label><div class="checks" id="wkDiet" role="group" aria-labelledby="wkDietLbl">
+        <button type="button" class="check" aria-pressed="false" data-v="Gluten-free (celiac)">Gluten-free</button>
+        <button type="button" class="check" aria-pressed="false" data-v="Nut allergy">Nut allergy</button>
+        <button type="button" class="check" aria-pressed="false" data-v="Vegetarian">Vegetarian</button>
+        <button type="button" class="check" aria-pressed="false" data-v="Pescatarian">Pescatarian</button></div></div>
+      <button class="btn primary" id="wkBuild" style="width:100%;margin-top:6px">Personalize this guest</button>
+    </div>`;
+  document.querySelectorAll("#wkDiet .check").forEach(c=>c.onclick=()=>{ const on=c.classList.toggle("on"); c.setAttribute("aria-pressed",on?"true":"false"); });
+  $("#wkBuild").onclick=buildWalkin;
+}
+function buildWalkin(){
+  const g=activeGuest;
+  const city=$("#wkCity").value, occ=$("#wkOcc").value;
+  const diet=[...document.querySelectorAll("#wkDiet .check.on")].map(c=>c.dataset.v);
+  const strict=diet.some(d=>/celiac|nut/i.test(d));
+  const tagsByOcc={leisure:["walkable"],anniversary:["romantic","wine"],business:["business","fitness"],family:["family","kids"]};
+  g.property={name:{ "New York":"Lotus SoHo","Chicago":"Lotus Loop","San Francisco":"Lotus Embarcadero"}[city], city};
+  g.occasionKey=occ; g.occasion={leisure:"Leisure stay",anniversary:"Anniversary / romantic getaway",business:"Business trip",family:"Family visit"}[occ];
+  g.dietary={restrictions:diet.length?diet:["No restrictions noted"],loves:[],avoid:[],strict};
+  g.prefTags=[...(tagsByOcc[occ]||[]),...diet.map(d=>/celiac/i.test(d)?"gluten-free":/nut/i.test(d)?"nut-free":d.toLowerCase())];
+  g.interests={leisure:["Local dining","Easy walks"],anniversary:["Fine dining","Spa"],business:["Fitness","Efficient service"],family:["Family attractions","Pool"]}[occ];
+  g.room={floor:"Preference not yet on file",temp:"Standard",bed:"To confirm at desk",extras:["Newly captured profile"]};
+  g.notes=[{src:"Walk-in · just now",t:"Profile captured at the desk &mdash; enrich after stay to lift the score."}];
+  g.signals=["walk-in intake",occ,...diet.slice(0,2)];
+  g.score=diet.length?68:52; g.built=true;
+  renderChips(); renderCtx(); renderProfile(); animateBloom(23,g.score);
+  $("#stream").innerHTML=""; personalized=true; addTyping();
+  setTimeout(()=>addAI(buildAnswer("overview").html,false),500);
+  toast("Walk-in personalized");
+}
+function setActive(g){
+  if(!g) return; activeGuest=g;
+  renderRoster(); renderChips(); renderCtx(); renderProfile();
+  if(g.id!=="walkin"||g.built){ animateBloom(Math.max(23,g.score-30),g.score); }
+  document.querySelectorAll(".gcard").forEach(b=>b.classList.remove("active"));
+  const rb=document.querySelector(`.gcard[data-id="${g.id}"]`); if(rb) rb.classList.add("active");
+}
+
+/* ---------- settings ---------- */
+function openDrawer(o){ $("#scrim").classList.toggle("open",o); $("#drawer").classList.toggle("open",o); if(o){ syncCfg(); setTimeout(()=>{ const f=$("#provider"); if(f) f.focus(); },50); } else { const g=$("#gear"); if(g) g.focus(); } }
+function syncCfg(){
+  $("#provider").value=llm.provider; $("#apiKey").value=llm.key; $("#model").value=llm.model;
+  $("#azEndpoint").value=llm.azEndpoint; $("#azDeploy").value=llm.azDeploy;
+  $("#azureFields").style.display=llm.provider==="azure"?"block":"none"; updateStatus();
+}
+function updateStatus(){
+  const live=llm.provider!=="local"&&llm.key; const s=$("#cfgStatus");
+  s.className="status-line"+(live?" live":"");
+  s.innerHTML=live?`Status: live &mdash; ${llm.provider==="azure"?"Azure OpenAI":"OpenAI"} connected (auto-fallback on error).`:"Status: on-device engine active (offline, no key).";
+}
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),1800); }
+
+/* ---------- wiring ---------- */
+$("#gear").onclick=()=>openDrawer(true);
+$("#closeCfg").onclick=()=>openDrawer(false);
+$("#scrim").onclick=()=>openDrawer(false);
+$("#provider").onchange=e=>{ llm.provider=e.target.value; $("#azureFields").style.display=llm.provider==="azure"?"block":"none"; };
+$("#saveCfg").onclick=()=>{
+  llm.provider=$("#provider").value; llm.key=$("#apiKey").value.trim(); llm.model=$("#model").value.trim();
+  llm.azEndpoint=$("#azEndpoint").value.trim(); llm.azDeploy=$("#azDeploy").value.trim();
+  try{ sessionStorage.setItem("lotus_llm",JSON.stringify(llm)); }catch(e){}
+  updateStatus(); toast("Model settings saved");
+};
+$("#clearCfg").onclick=()=>{ llm.key=""; try{ sessionStorage.removeItem("lotus_llm"); }catch(e){} $("#apiKey").value=""; updateStatus(); toast("API key cleared"); };
+$("#walkinBtn").onclick=()=>{
+  let w=GUESTS.find(x=>x.id==="walkin");
+  if(!w){ w={id:"walkin",name:"Walk-in guest",initials:"+",tier:"petal",color:"#1c4339",score:23,matchKeys:[],property:{name:"",city:""},visits:0,memberSince:"—",built:false}; GUESTS.push(w); }
+  else { w.built=false; }
+  setActive(w);
+  document.querySelectorAll("#roster .gcard").forEach(b=>b.classList.remove("active"));
+};
+const input=$("#input");
+input.addEventListener("input",()=>{ input.style.height="auto"; input.style.height=Math.min(input.scrollHeight,130)+"px"; });
+input.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); go(); } });
+$("#send").onclick=go;
+function go(){ const v=input.value; input.value=""; input.style.height="auto"; return ask(v); }
+
+/* ---------- presentation / demo mode ---------- */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const PRESENT_SCRIPT=[
+  {id:"sarah",q:"What are Sarah's room preferences?"},
+  {id:"sarah",q:"What welcome touch for Sarah's anniversary?"},
+  {id:"marcus",q:"Recommend gluten-free Italian dining for Marcus."},
+  {id:"okafor",q:"Plan a family-friendly afternoon for the Okafors."},
+  {id:"marcus",q:"Anything to prep before Marcus checks in?"}
+];
+let presenting=false, presentRunId=0, paused=false, skip=false;
+function banner(t){ const b=$("#presentBanner"); if(!t){ b.classList.remove("show"); b.innerHTML=""; return; } b.innerHTML=`<span class="d"></span>${t}`; b.classList.add("show"); }
+function waitScene(ms,run){
+  return new Promise(res=>{ let el=0; const iv=setInterval(()=>{
+    if(run!==presentRunId){ clearInterval(iv); res(); return; }
+    if(paused) return;
+    if(skip){ skip=false; clearInterval(iv); res(); return; }
+    el+=50; if(el>=ms){ clearInterval(iv); res(); }
+  },50); });
+}
+async function typewrite(el,text,run){ el.value=""; for(const ch of text){ if(run!==presentRunId) return; while(paused){ await sleep(80); if(run!==presentRunId) return; } el.value+=ch; el.dispatchEvent(new Event("input")); await sleep(26); } }
+function setPresentBtn(on){ const pb=$("#presentBtn"); pb.classList.toggle("on",on); pb.innerHTML=on?"&#9632; End demo":"&#9654; Begin demo"; pb.setAttribute("aria-label",on?"Stop guided demo":"Run guided demo"); }
+async function startPresent(){
+  presentRunId++; const run=presentRunId; presenting=true; paused=false; skip=false;
+  setPresentBtn(true); $("#input").blur(); $("#stream").innerHTML=""; personalized=true;
+  setActive(GUESTS[0]);
+  banner("Guided run &middot; setting the scene");
+  animateBloom(23,GUESTS[0].score); toast("Sarah: 23% \u2192 96% personalized");
+  await waitScene(2400,run); if(run!==presentRunId) return;
+  for(let i=0;i<PRESENT_SCRIPT.length;i++){
+    if(run!==presentRunId) return;
+    const s=PRESENT_SCRIPT[i];
+    setActive(GUESTS.find(g=>g.id===s.id));
+    banner(`Guided run &middot; Scene ${i+1} of ${PRESENT_SCRIPT.length}`);
+    await waitScene(700,run); if(run!==presentRunId) return;
+    await typewrite($("#input"), s.q, run); if(run!==presentRunId) return;
+    await waitScene(260,run); if(run!==presentRunId) return;
+    await go();
+    await waitScene(3000,run); if(run!==presentRunId) return;
+  }
+  banner("Guided run &middot; complete"); endPresent(true);
+}
+function endPresent(done){
+  presenting=false; paused=false; presentRunId++;
+  setPresentBtn(false);
+  const t=$("#typing"); if(t) t.remove();
+  $("#input").value=""; $("#input").style.height="auto";
+  if(done){ setTimeout(()=>{ if(!presenting) banner(""); },2800); } else banner("");
+}
+function togglePresent(){ if(presenting) endPresent(false); else startPresent(); }
+$("#presentBtn").onclick=togglePresent;
+document.addEventListener("keydown",e=>{
+  if(presenting){
+    if(e.key==="Escape"){ e.preventDefault(); endPresent(false); return; }
+    if(e.key===" "){ e.preventDefault(); paused=!paused; banner(paused?"Guided run &middot; paused":"Guided run &middot; resumed"); return; }
+    if(e.key==="ArrowRight"){ e.preventDefault(); skip=true; return; }
+    if(e.key.toLowerCase()==="r"){ e.preventDefault(); startPresent(); return; }
+    return;
+  }
+  if(e.key==="Escape"){ openDrawer(false); return; }
+  const tag=(document.activeElement&&document.activeElement.tagName)||"";
+  if(["INPUT","TEXTAREA","SELECT"].includes(tag)) return;
+  if(e.key>="1"&&e.key<="5"){ const q=SCENARIOS[+e.key-1]; if(q) ask(q.replace(/&rsquo;/g,"'")); }
+  else if(e.key.toLowerCase()==="p"){ togglePresent(); }
+  else if(e.key.toLowerCase()==="w"){ $("#walkinBtn").click(); }
+});
+
+/* ---------- init ---------- */
+renderMetrics(); renderRoster(); renderScenarios(); renderChips(); renderCtx(); renderProfile(); renderCurtain();
+</script>
+</body>
+</html>
