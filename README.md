@@ -15,6 +15,7 @@ An AI-powered **Guest Personalization Assistant** for a boutique hotel chain —
 - **Natural-language concierge** — staff ask in plain English; the engine resolves intent and returns tailored recommendations, with **contextual follow-up suggestions** after every answer.
 - **Explainable by design** — every answer shows the **"Signals used"** (the exact profile cues behind it) plus a business **Impact** callout.
 - **Dietary safety guardrails** — celiac/nut-allergy guests can *never* be shown an unsafe venue (hard filter + visible "Risk-Siren").
+- **Real imagery** — guest portraits and photo thumbnails on every dining/activity recommendation (and photo-backed cards in the Local Flavor tool). Images load from the web with a graceful **fallback to inline SVG illustrations** if offline, so the demo never breaks.
 - **"The Living Folio" art direction** — an editorial, ink‑and‑paper concierge identity: Fraunces ledger headings, a hand‑drawn hero, de‑boxed specimen rows, a signature **Lotus Dial** that inks in its petals as the personalization score rises, and a subtle paper grain. Deliberately not a generic SaaS dashboard.
 - **Light & dark themes** — a warm rose-pink design system with a one-click theme toggle that respects your OS preference.
 - **10 interactive "Atelier Tools"** — a launcher (press **T**) of visual, hands-on tools that turn guest data into action (storyboard, radar, dial, heatmap, constellation, and more).
