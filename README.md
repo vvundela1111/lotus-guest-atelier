@@ -31,8 +31,8 @@ An AI-powered **Guest Personalization Assistant** for a boutique hotel chain —
 | **Conversational queries** | "What are Sarah's room preferences?" · "Recommend gluten-free Italian for Marcus." · "Plan a family afternoon for the Okafors." |
 | **Personalized recommendations** | Room & climate, dining, local activities, and special touches — ranked against the guest's profile and constraints. |
 | **Proactive pre-arrival prep** | An owner-tagged checklist (Housekeeping / Kitchen / Concierge / Front Desk) generated per guest, with one-tap staff actions. |
-| **Personalization score ("Bloom")** | Animated 23% → personalized score dramatizes the transformation for each guest. |
-| **Walk-in intake** | Capture an unknown guest's prefs at the desk and personalize on the spot. |
+| **Personalization score ("Bloom")** | A genuinely computed **AHP‑weighted** score (not a hardcoded number) — see [The personalization engine](#the-personalization-engine) — animated 23% → score to dramatize the transformation. Hover the Bloom to see the weighted criteria breakdown. |
+| **Walk-in intake** | Capture an unknown guest's prefs at the desk and personalize on the spot — cold‑start tastes are predicted by **user‑based collaborative filtering** over a cohort of similar past guests. |
 
 ### The five demo scenarios
 1. What are Sarah's room preferences?
@@ -42,6 +42,26 @@ An AI-powered **Guest Personalization Assistant** for a boutique hotel chain —
 5. Anything to prep before Marcus checks in?
 
 ![Dietary guardrail](docs/screenshot-guardrail.png)
+
+---
+
+## The personalization engine
+
+The Bloom score and walk-in tastes are **really computed on-device** — no hardcoded demo numbers, no API calls. The approach is adapted from Zhang et al., *"Hotel Recommendation Systems Based on AHP and Collaborative Filtering Combination Algorithm"* (2019 IEEE Chinese Control and Decision Conference, doc. 8832452), which pairs the **Analytic Hierarchy Process (AHP)** for weighting decision factors with **collaborative filtering** for cold‑start recommendation.
+
+### Personalization score — AHP-weighted
+
+Each guest is scored across six criteria: **loyalty, stay history, dietary clarity, stated preferences, occasion, and resolved stay-notes**. Rather than guess the weights, we build a 6×6 Saaty pairwise-comparison matrix (how much more each criterion matters than another), then derive the priority weights from its principal eigenvector:
+
+1. Normalize each column of the matrix, then row‑average to get the weight vector `w` (≈ dietary 0.29, prefs 0.29, occasion 0.17, stays 0.11, notes 0.08, loyalty 0.07).
+2. Compute λ<sub>max</sub>, the **Consistency Index** `CI = (λmax − n)/(n − 1)`, and the **Consistency Ratio** `CR = CI/RI`. Our matrix yields **CR ≈ 0.013 (< 0.10)**, so the judgments are internally consistent and the weights are valid.
+3. Map each guest's data to a 0–1 sub-score per criterion, then `score = Σ(wᵢ · subᵢ) × 100` (clamped 5–99).
+
+Hover the Lotus Dial to see the live per-criterion breakdown and the consistency ratio.
+
+### Walk-in cold-start — user-based collaborative filtering
+
+A walk-in has no rating history, so item‑based CF can't start. Following the paper's hybrid, we run **user‑based CF over guest attributes**: the new guest is represented as a vector of their occasion (one-hot) plus dietary flags, compared by **cosine similarity** against an anonymized cohort of past guests. We take the **k nearest neighbours** (top‑5, similarity > 0) and predict each taste's rating as a similarity‑weighted average, `pred(item) = Σ(simᵤ · ratingᵤ,item) / Σ simᵤ`. Tastes with a predicted rating ≥ 3.6 seed the guest's preferences (so downstream ranking recommends accordingly), and the average neighbour similarity becomes a **confidence** value shown in the walk-in panel ("Predicted from N similar guests · XX% match"). The score then blends AHP profile completeness with that CF confidence.
 
 ---
 

@@ -182,6 +182,13 @@
   .signals .sk{color:var(--brass-2);font-family:var(--serif);font-style:italic;font-weight:500;letter-spacing:.2px;font-size:12px;margin-bottom:7px}
   .signals .chips{display:flex;flex-wrap:wrap;gap:6px}
   .sig{font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(183,110,121,.1);color:var(--brass-2);border:1px solid rgba(183,110,121,.22)}
+  /* collaborative-filtering panel (walk-in cold-start) */
+  .cfp{border:1px solid var(--brass);border-radius:12px;padding:13px 15px;margin-bottom:13px;background:var(--brass-soft)}
+  .cfh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--heading)}
+  .cfc{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--brass-2)}
+  .cfbar{height:6px;border-radius:6px;background:var(--chip);margin:9px 0;overflow:hidden}
+  .cffill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--brass),var(--gold));transition:width 1s cubic-bezier(.22,1,.36,1)}
+  .cfl{font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:9px}
 
   /* Composer */
   .composer{border-top:1px solid var(--line);padding:14px 26px 18px;background:var(--paper)}
@@ -718,6 +725,99 @@ const $ = s => document.querySelector(s);
 let activeGuest = GUESTS[0];
 let personalized = false;
 
+/* ============================================================
+   PERSONALIZATION SCORE — Analytic Hierarchy Process (AHP)
+   (after Zhang et al., "Hotel Recommendation Systems Based on AHP
+   and Collaborative Filtering Combination Algorithm", CCDC 2019)
+   AHP quantifies the weight of each factor that makes a guest
+   profile actionable; the score is the AHP-weighted sum of
+   per-criterion completeness/confidence sub-scores (0..100).
+   ============================================================ */
+const AHP_CRIT=["loyalty","stays","dietary","prefs","occasion","notes"];
+// Saaty pairwise-comparison matrix (row is "how much more important than" col)
+const AHP_MATRIX=[
+/* Loy  Sta  Die  Pre  Occ  Not */
+  [1,   1/2, 1/4, 1/4, 1/3, 1  ], // Loyalty
+  [2,   1,   1/3, 1/3, 1/2, 2  ], // Stay history
+  [4,   3,   1,   1,   2,   3  ], // Dietary intelligence
+  [4,   3,   1,   1,   2,   3  ], // Preferences on file
+  [3,   2,   1/2, 1/2, 1,   2  ], // Occasion & context
+  [1,   1/2, 1/3, 1/3, 1/2, 1  ]  // Notes & follow-through
+];
+function ahp(M){
+  const n=M.length, col=Array(n).fill(0);
+  for(let j=0;j<n;j++) for(let i=0;i<n;i++) col[j]+=M[i][j];
+  const w=Array(n).fill(0);            // priority vector = row-avg of column-normalized matrix
+  for(let i=0;i<n;i++){ let s=0; for(let j=0;j<n;j++) s+=M[i][j]/col[j]; w[i]=s/n; }
+  let lmax=0;                          // consistency check
+  for(let i=0;i<n;i++){ let aw=0; for(let j=0;j<n;j++) aw+=M[i][j]*w[j]; lmax+=aw/w[i]; }
+  lmax/=n;
+  const CI=(lmax-n)/(n-1), RI=[0,0,.58,.9,1.12,1.24,1.32][n-1]||1.32;
+  return {w, lmax, CI, CR:CI/RI};
+}
+const AHP=ahp(AHP_MATRIX);
+const clamp01=x=>Number.isFinite(x)?Math.max(0,Math.min(1,x)):0;
+function subScores(g){
+  const my=parseInt(g.memberSince,10);
+  const yrs=Number.isFinite(my)?Math.max(0,(new Date().getFullYear()-my)):0;
+  const tierW={lotus:1,blossom:.72,petal:.48}[g.tier]??.4;
+  const loyalty=clamp01(.55*tierW+.45*Math.min(yrs/6,1));
+  const stays=Math.min((g.visits||0)/12,1);
+  const restr=(g.dietary?.restrictions||[]).filter(r=>!/no restr/i.test(r));
+  const dietary=restr.length?(g.dietary.strict?1:.7):.15;
+  const room=g.room||{}, pf=[room.floor,room.temp,room.bed,(room.extras&&room.extras.length)]
+    .filter(x=>x&&!/to confirm|not yet|standard|newly/i.test(String(x))).length;
+  const prefs=Math.min(pf/4,1);
+  const occasion=g.occasionKey&&g.occasionKey!=="leisure"?1:(g.occasionKey?.6:.2);
+  const nt=(g.notes||[]), open=nt.filter(n=>/follow-up/i.test(n.src)).length, resolved=Math.max(0,nt.length-open);
+  const notes=nt.length?clamp01(Math.min(nt.length/3,1)*.7+(resolved/Math.max(nt.length,1))*.3):.1;
+  return {loyalty,stays,dietary,prefs,occasion,notes};
+}
+function computeScore(g){
+  const s=subScores(g);
+  let acc=0; AHP_CRIT.forEach((c,i)=>acc+=AHP.w[i]*s[c]);
+  let score=acc*100;
+  if(g.cf && g.cf.conf) score=score*.5 + (g.cf.conf*avgTopPred(g.cf.pred))*100*.5; // walk-ins: blend in CF confidence
+  return Math.max(5,Math.min(99,Math.round(score)));
+}
+
+/* ============================================================
+   COLLABORATIVE FILTERING — user-based, for walk-in cold-start
+   Attribute-based neighbour similarity (the AHP+CF hybrid the
+   paper uses for new customers with no rating history), then a
+   similarity-weighted prediction of tastes from similar guests.
+   ============================================================ */
+const CF_ITEMS=["italian","seafood","steak","coffee","wine","spa","fitness","family","pool","aquarium","art","jazz","romantic","nightlife","walkable","kids","vegetarian"];
+// anonymised past-guest cohort: ratings 1..5 over item categories (sparse)
+const COHORT=[
+  {occ:"anniversary",diet:[],            r:{italian:5,wine:5,romantic:5,seafood:4,spa:5,art:4,jazz:4,walkable:3}},
+  {occ:"anniversary",diet:["pescatarian"],r:{seafood:5,italian:4,wine:5,romantic:5,spa:4,art:4}},
+  {occ:"business",   diet:["gluten-free"],r:{steak:5,coffee:5,fitness:5,italian:4,nightlife:3,walkable:4}},
+  {occ:"business",   diet:[],            r:{steak:4,coffee:5,fitness:4,nightlife:4,wine:3,walkable:3}},
+  {occ:"family",     diet:["nut allergy"],r:{family:5,kids:5,pool:5,aquarium:5,italian:4,walkable:4,vegetarian:4}},
+  {occ:"family",     diet:["vegetarian"],r:{family:5,kids:4,pool:4,vegetarian:5,walkable:4,aquarium:4}},
+  {occ:"leisure",    diet:[],            r:{walkable:5,art:4,coffee:4,wine:4,jazz:3,italian:3}},
+  {occ:"leisure",    diet:["pescatarian"],r:{seafood:5,walkable:4,spa:4,art:3,coffee:3}},
+  {occ:"business",   diet:[],            r:{fitness:5,coffee:4,steak:4,walkable:3,nightlife:3}},
+  {occ:"family",     diet:[],            r:{family:5,pool:5,kids:5,aquarium:4,walkable:5,italian:4}}
+];
+function attrVec(occ,diet){                     // customer-attribute space for similarity
+  const occs=["anniversary","business","family","leisure"], diets=["gluten","nut","vegetarian","pescatarian"];
+  const d=(diet||[]).join(" ").toLowerCase();
+  return [...occs.map(o=>occ===o?1:0), ...diets.map(x=>d.includes(x)?1:0)];
+}
+function cosine(a,b){ let dot=0,na=0,nb=0; for(let i=0;i<a.length;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i];} return (na&&nb)?dot/(Math.sqrt(na)*Math.sqrt(nb)):0; }
+function avgTopPred(pred){ const v=Object.values(pred||{}).sort((a,b)=>b-a).slice(0,5); return v.length?(v.reduce((a,x)=>a+x,0)/v.length)/5:0; }
+function cfPredict(occ,diet){
+  const u=attrVec(occ,diet);
+  const sims=COHORT.map(n=>({n,s:cosine(u,attrVec(n.occ,n.diet))})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,5); // kNN
+  const pred={};
+  CF_ITEMS.forEach(it=>{ let num=0,den=0; sims.forEach(({n,s})=>{ if(n.r[it]!=null){ num+=s*n.r[it]; den+=s; } }); if(den>0) pred[it]=+(num/den).toFixed(2); });
+  const conf=sims.length?sims.reduce((a,x)=>a+x.s,0)/sims.length:0;
+  const tastes=Object.entries(pred).filter(([,v])=>v>=3.6).sort((a,b)=>b[1]-a[1]).map(([k])=>k);
+  return {pred, conf:+conf.toFixed(3), neighbours:sims.length, tastes};
+}
+
 function guestFromText(q){
   const t=" "+q.toLowerCase().replace(/[^a-z\s]/g," ").replace(/\s+/g," ")+" ";
   for(const g of GUESTS){ if(g.matchKeys.some(k=>t.includes(" "+k+" "))) return g; }
@@ -1112,15 +1212,18 @@ function renderProfile(){
   if(g.id==="walkin" && !g.built){ return renderIntake(); }
   const diet=g.dietary.restrictions.map(r=>`<span class="flag warn">${r}</span>`).join("")+g.dietary.loves.map(l=>`<span class="flag love">${l}</span>`).join("");
   const notes=(g.notes||[]).map(n=>`<li><span class="src">${n.src}</span>${n.t}</li>`).join("");
+  const ss=subScores(g), brk=AHP_CRIT.map((c,i)=>`${c}: ${Math.round(ss[c]*100)}% x w${AHP.w[i].toFixed(2)}`).join("\n");
+  const capTxt=g.cf?`Cold-start estimate: AHP profile completeness blended with collaborative-filtering confidence (${Math.round(g.cf.conf*100)}% from ${g.cf.neighbours} similar guests).`
+    :`AHP-weighted from loyalty, stays, dietary, preferences, occasion &amp; notes. Consistency ratio ${AHP.CR.toFixed(3)} (&lt;0.10 = consistent).`;
   $("#profilePanel").innerHTML=`
-    <div class="bloom"><div class="dial" id="bloomDial" style="--p:${(g.score/100).toFixed(3)}"><svg viewBox="0 0 24 24" aria-hidden="true">
+    <div class="bloom" title="AHP personalization score = ${g.score}&#10;${brk}&#10;Consistency ratio ${AHP.CR.toFixed(3)}"><div class="dial" id="bloomDial" style="--p:${(g.score/100).toFixed(3)}"><svg viewBox="0 0 24 24" aria-hidden="true">
         <path class="petal" pathLength="100" d="M12 20V8"/>
         <path class="petal" pathLength="100" d="M12 20c-3-1.6-4.5-4.4-5-8 2.4 1 4 3.5 5 8z"/>
         <path class="petal" pathLength="100" d="M12 20c3-1.6 4.5-4.4 5-8-2.4 1-4 3.5-5 8z"/>
         <path class="petal" pathLength="100" d="M12 20c-4-.8-6.5-2.6-8-5.6 3-.3 6 1.3 8 5.6z"/>
         <path class="petal" pathLength="100" d="M12 20c4-.8 6.5-2.6 8-5.6-3-.3-6 1.3-8 5.6z"/></svg></div>
       <div class="bmeta"><div class="bh"><span class="bl">Personalization</span><span class="bs" id="bloomScore">${g.score}</span></div>
-      <div class="cap">Signals resolved from booking, loyalty, stay notes &amp; feedback.</div></div></div>
+      <div class="cap">${capTxt}</div></div></div>
     <div class="overline">Guest Dossier</div>
     <div class="profile-hd">${avatar(g)}<div><div class="nm">${g.name}</div><div class="pm">${cap(g.tier)} · member since ${g.memberSince} · ${g.visits} stays</div></div></div>
     <div class="occasion"><div class="ol">This Stay</div><div class="ov">${g.occasion}</div></div>
@@ -1168,20 +1271,32 @@ function buildWalkin(){
   const city=$("#wkCity").value, occ=$("#wkOcc").value;
   const diet=[...document.querySelectorAll("#wkDiet .check.on")].map(c=>c.dataset.v);
   const strict=diet.some(d=>/celiac|nut/i.test(d));
-  const tagsByOcc={leisure:["walkable"],anniversary:["romantic","wine"],business:["business","fitness"],family:["family","kids"]};
+  // ---- user-based collaborative filtering (cold-start prediction) ----
+  const cf=cfPredict(occ,diet);
+  const dietTags=diet.map(d=>/celiac/i.test(d)?"gluten-free":/nut/i.test(d)?"nut-free":d.toLowerCase());
   g.property={name:{ "New York":"Lotus SoHo","Chicago":"Lotus Loop","San Francisco":"Lotus Embarcadero"}[city], city};
   g.occasionKey=occ; g.occasion={leisure:"Leisure stay",anniversary:"Anniversary / romantic getaway",business:"Business trip",family:"Family visit"}[occ];
-  g.dietary={restrictions:diet.length?diet:["No restrictions noted"],loves:[],avoid:[],strict};
-  g.prefTags=[...(tagsByOcc[occ]||[]),...diet.map(d=>/celiac/i.test(d)?"gluten-free":/nut/i.test(d)?"nut-free":d.toLowerCase())];
-  g.interests={leisure:["Local dining","Easy walks"],anniversary:["Fine dining","Spa"],business:["Fitness","Efficient service"],family:["Family attractions","Pool"]}[occ];
+  g.dietary={restrictions:diet.length?diet:["No restrictions noted"],loves:cf.tastes.slice(0,3),avoid:[],strict};
+  g.prefTags=[...new Set([...cf.tastes, ...dietTags])];        // recommendations now rank by CF-predicted tastes
+  g.interests=cf.tastes.slice(0,5).map(t=>t[0].toUpperCase()+t.slice(1));
   g.room={floor:"Preference not yet on file",temp:"Standard",bed:"To confirm at desk",extras:["Newly captured profile"]};
-  g.notes=[{src:"Walk-in · just now",t:"Profile captured at the desk &mdash; enrich after stay to lift the score."}];
-  g.signals=["walk-in intake",occ,...diet.slice(0,2)];
-  g.score=diet.length?68:52; g.built=true;
+  g.notes=[{src:"Walk-in · just now",t:`Profile captured at the desk. Tastes predicted from ${cf.neighbours} similar guests (collaborative filtering).`}];
+  g.signals=["walk-in intake",occ,...diet.slice(0,2),`${cf.neighbours} similar guests`].filter(Boolean);
+  g.cf=cf; g.built=true;
+  g.score=computeScore(g);                                      // AHP completeness blended with CF confidence
   renderChips(); renderCtx(); renderProfile(); animateBloom(23,g.score);
   $("#stream").innerHTML=""; personalized=true; addTyping();
-  setTimeout(()=>addAI(buildAnswer("overview").html, followups(activeGuest,"overview")),500);
-  toast("Walk-in personalized");
+  setTimeout(()=>addAI(cfPanel(g)+buildAnswer("overview").html, followups(activeGuest,"overview")),500);
+  toast(`Walk-in personalized · ${cf.neighbours} similar guests`);
+}
+function cfPanel(g){
+  const cf=g.cf; if(!cf) return "";
+  const conf=Math.round(cf.conf*100);
+  const chips=cf.tastes.slice(0,6).map(t=>`<span class="sig">${t.replace(/-/g," ")} · ${cf.pred[t]}&#9733;</span>`).join("");
+  return `<div class="cfp"><div class="cfh"><span>Predicted from ${cf.neighbours} similar guests</span><span class="cfc">${conf}% match</span></div>
+    <div class="cfbar"><div class="cffill" style="width:${conf}%"></div></div>
+    <div class="cfl">Collaborative filtering &mdash; tastes inferred from guests with a similar occasion &amp; dietary profile:</div>
+    <div class="chips">${chips}</div></div>`;
 }
 function setActive(g){
   if(!g) return; activeGuest=g;
@@ -1238,7 +1353,7 @@ async function startPresent(){
   setPresentBtn(true); $("#input").blur(); $("#stream").innerHTML=""; personalized=true;
   setActive(GUESTS[0]);
   banner("Guided run &middot; setting the scene");
-  animateBloom(23,GUESTS[0].score); toast("Sarah: 23% \u2192 96% personalized");
+  animateBloom(23,GUESTS[0].score); toast(`${GUESTS[0].name.split(" ")[0]}: 23% \u2192 ${GUESTS[0].score}% personalized`);
   await waitScene(2400,run); if(run!==presentRunId) return;
   for(let i=0;i<PRESENT_SCRIPT.length;i++){
     if(run!==presentRunId) return;
@@ -1554,6 +1669,7 @@ function renderLoad(g,root){
 }
 
 /* ---------- init ---------- */
+GUESTS.forEach(g=>{ if(g.id!=="walkin") g.score=computeScore(g); });   // genuine AHP-computed scores
 renderMetrics(); renderRoster(); renderScenarios(); renderChips(); renderCtx(); renderProfile(); renderCurtain();
 
 /* ---------- staff login gate ---------- */
