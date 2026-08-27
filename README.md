@@ -15,7 +15,8 @@ An AI-powered **Guest Personalization Assistant** for a boutique hotel chain —
 - **Natural-language concierge** — staff ask in plain English; the engine resolves intent and returns tailored recommendations, with **contextual follow-up suggestions** after every answer.
 - **Explainable by design** — every answer shows the **"Signals used"** (the exact profile cues behind it) plus a business **Impact** callout.
 - **Dietary safety guardrails** — celiac/nut-allergy guests can *never* be shown an unsafe venue (hard filter + visible "Risk-Siren").
-- **Light & dark themes** — a warm rose-pink design system (the "ATV" palette) with a one-click theme toggle that respects your OS preference.
+- **"The Living Folio" art direction** — an editorial, ink‑and‑paper concierge identity: Fraunces ledger headings, a hand‑drawn hero, de‑boxed specimen rows, a signature **Lotus Dial** that inks in its petals as the personalization score rises, and a subtle paper grain. Deliberately not a generic SaaS dashboard.
+- **Light & dark themes** — a warm rose-pink design system with a one-click theme toggle that respects your OS preference.
 - **10 interactive "Atelier Tools"** — a launcher (press **T**) of visual, hands-on tools that turn guest data into action (storyboard, radar, dial, heatmap, constellation, and more).
 - **One-click guided demo** — presenter-ready "Begin demo" mode with scene labels, pause/step/restart, and keyboard shortcuts.
 
@@ -131,7 +132,7 @@ This app wasn't written in one pass. It was produced by a **multi-agent "build n
 - **UX system:** adapted from [ATV Design](https://github.com/All-The-Vibes/ATV-Design) using its warm editorial tokens, Fraunces/DM Sans typography, compact controls, layered surfaces, and responsive layout patterns.
 - **Data:** in-memory fictional profiles (no database, no persistence, no PII).
 - **AI:** a fully **on-device** rule/intent engine — no keys, no network, no data leaves the browser.
-- **Design:** the warm "ATV" design system (rose-pink accent on clay + cream) with light/dark themes; Fraunces + DM Sans.
+- **Design:** "The Living Folio" — an editorial ink‑and‑paper identity (Fraunces + DM Sans, rose‑pink accent, ledger headings, Lotus Dial, paper grain), light + dark themes, run through anti‑AI‑slop principles (one accent, tone‑step regions over boxes, sentence case over shouty caps, real SVG not emoji).
 - **Out of scope (per the hackathon brief):** real PMS/booking integration, auth/RBAC, cloud deployment, mobile app.
 
 ### Success metrics it targets
