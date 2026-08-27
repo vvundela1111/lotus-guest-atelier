@@ -11,10 +11,11 @@ An AI-powered **Guest Personalization Assistant** for a boutique hotel chain —
 ## Highlights
 
 - **Single self-contained `index.html`** — no build step, no dependencies, no server. Double-click and it runs, fully offline.
-- **Natural-language concierge** — staff ask in plain English; the on-device engine resolves intent and returns tailored recommendations.
+- **100% on-device** — the reasoning engine runs entirely in the browser. **No API keys, no network calls, no data ever leaves the machine.**
+- **Natural-language concierge** — staff ask in plain English; the engine resolves intent and returns tailored recommendations, with **contextual follow-up suggestions** after every answer.
 - **Explainable by design** — every answer shows the **"Signals used"** (the exact profile cues behind it) plus a business **Impact** callout.
 - **Dietary safety guardrails** — celiac/nut-allergy guests can *never* be shown an unsafe venue (hard filter + visible "Risk-Siren").
-- **Optional live LLM** — connect OpenAI or Azure OpenAI; if anything fails, it silently falls back to the on-device engine so a demo never breaks.
+- **Light & dark themes** — a warm terracotta/clay design system (the "ATV" palette) with a one-click theme toggle that respects your OS preference.
 - **One-click guided demo** — presenter-ready "Begin demo" mode with scene labels, pause/step/restart, and keyboard shortcuts.
 
 ---
@@ -63,13 +64,12 @@ Click **▶ Begin demo** (or press **P**) to auto-run the scripted scenarios.
 | `Space` | Pause / resume the demo |
 | `→` | Skip to the next scene |
 | `R` | Restart the demo |
-| `Esc` | Stop demo / close settings |
+| `Esc` | Stop the demo |
 
-### Optional: connect a live model
-Open the gear (⚙) → pick OpenAI or Azure OpenAI → paste a key.
-Keys are held **for the browser session only** (never written to disk) and sent solely to the provider you select; Azure endpoints are validated to `*.openai.azure.com`. Any failure falls back to the on-device engine.
+### Light & dark themes
+Click the sun/moon toggle in the header (top-right) to switch themes. Your choice is remembered, and on first visit the app follows your operating-system light/dark preference. The palette is the warm **ATV design system** — terracotta accent, clay/cream neutrals, Fraunces + DM Sans type.
 
-![Walk-in intake](docs/screenshot-walkin.png)
+![Dark mode](docs/screenshot-dark.png)
 
 ---
 
@@ -86,17 +86,17 @@ This app wasn't written in one pass. It was produced by a **multi-agent "build n
 | **Wildcard** | Creative | Hero "23% → personalized" reveal, Bloom score, allergy Risk-Siren |
 | **Verifier** | QA (owns the gate) | **Executed the app in a headless browser**; caught real bugs and a demo race condition |
 | **User Advocate** | Real-need check | Owner-tagged checklist, quick actions, impact callouts, projector-safe layout |
-| **Guardian** | Security · privacy · a11y | Caught a **DOM-XSS**, hardened API-key handling, validated the Azure endpoint, added keyboard/ARIA accessibility |
+| **Guardian** | Security · privacy · a11y | Caught a **DOM-XSS**, hardened data handling, and drove WCAG-AA contrast + keyboard/ARIA accessibility across both themes |
 
-### Bugs the network caught & fixed
+### How the network shaped it (across iterations)
 - **DOM-XSS** — free-text queries were injected via `innerHTML`; now escaped.
 - **Demo race condition** — stop-then-restart could overlap runs; fixed with a per-run token.
-- **API-key persistence** — moved from `localStorage` to session-only + a "Clear key" control.
-- **Unvalidated Azure endpoint** — now restricted to `https://*.openai.azure.com`.
+- **Removed the live-LLM / API-key feature entirely** — the app is now 100% on-device, which erased a whole class of key-handling and endpoint-validation risk and strengthens the "no data leaves the room" story.
 - **Intent-routing bugs** — a stopword ("the") mis-routed guests; welcome-touch vs. prep priority; missing family/afternoon intents. All fixed and re-verified.
-- **Accessibility** — clickable `div`s became real buttons/checkboxes; ARIA labels, dialog semantics, contrast, and `prefers-reduced-motion`.
+- **Accessibility** — clickable `div`s became real buttons/checkboxes; ARIA labels, dialog semantics, `prefers-reduced-motion`, and AA contrast checked in light **and** dark.
+- **UI polish** — informed by public design references (Impeccable, the "11 ways to improve vibe-coded design" deck, ui-ux-pro-max, CopilotKit): one accent colour with room to breathe, real SVG icons (no emoji), and de-cluttered surfaces.
 
-![Guided demo with impact callout](docs/screenshot-guided-run.png)
+![Gluten-free guardrail with impact callout](docs/screenshot-guardrail.png)
 
 ---
 
@@ -104,7 +104,8 @@ This app wasn't written in one pass. It was produced by a **multi-agent "build n
 
 - **Stack:** vanilla HTML + CSS + JavaScript. Zero frameworks, zero build. One file.
 - **Data:** in-memory fictional profiles (no database, no persistence, no PII).
-- **AI:** an on-device rule/intent engine by default; optional OpenAI / Azure OpenAI passthrough.
+- **AI:** a fully **on-device** rule/intent engine — no keys, no network, no data leaves the browser.
+- **Design:** the warm "ATV" design system (terracotta + clay + cream) with light/dark themes; Fraunces + DM Sans.
 - **Out of scope (per the hackathon brief):** real PMS/booking integration, auth/RBAC, cloud deployment, mobile app.
 
 ### Success metrics it targets
@@ -119,11 +120,9 @@ Higher guest satisfaction · more direct bookings & repeat visits · reduced fro
 ├── README.md
 ├── LICENSE
 └── docs/                       # screenshots for this README
-    ├── screenshot-hero.png
-    ├── screenshot-guided-run.png
-    ├── screenshot-guardrail.png
-    ├── screenshot-family.png
-    └── screenshot-walkin.png
+    ├── screenshot-hero.png     # light theme
+    ├── screenshot-dark.png     # dark theme
+    └── screenshot-guardrail.png
 ```
 
 ---
