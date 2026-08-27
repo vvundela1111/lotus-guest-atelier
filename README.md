@@ -82,7 +82,7 @@ This app wasn't written in one pass. It was produced by a **multi-agent "build n
 | **Director** | Orchestration & oversight | Ran the pipeline, arbitrated conflicts, kept scope tied to the brief |
 | **Architect** | Prompt/spec engineer | Turned the brief into checkable acceptance criteria |
 | **Maker** | Builder | Wrote the actual HTML/CSS/JS |
-| **Critic** | Anti-"AI-slop" | Drove the editorial redesign (palette, Cormorant serif, custom lotus, provenance lines, invented venue names) |
+| **Critic** | Anti-"AI-slop" | Drove the original editorial direction, custom lotus, provenance lines, and invented venue names |
 | **Wildcard** | Creative | Hero "23% → personalized" reveal, Bloom score, allergy Risk-Siren |
 | **Verifier** | QA (owns the gate) | **Executed the app in a headless browser**; caught real bugs and a demo race condition |
 | **User Advocate** | Real-need check | Owner-tagged checklist, quick actions, impact callouts, projector-safe layout |
@@ -103,6 +103,7 @@ This app wasn't written in one pass. It was produced by a **multi-agent "build n
 ## Tech & scope
 
 - **Stack:** vanilla HTML + CSS + JavaScript. Zero frameworks, zero build. One file.
+- **UX system:** adapted from [ATV Design](https://github.com/All-The-Vibes/ATV-Design) using its warm editorial tokens, Fraunces/DM Sans typography, compact controls, layered surfaces, and responsive layout patterns.
 - **Data:** in-memory fictional profiles (no database, no persistence, no PII).
 - **AI:** a fully **on-device** rule/intent engine — no keys, no network, no data leaves the browser.
 - **Design:** the warm "ATV" design system (terracotta + clay + cream) with light/dark themes; Fraunces + DM Sans.
