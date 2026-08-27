@@ -742,9 +742,30 @@ function photoKey(i){ const t=(i.tags||[]).join(" ");
   if(i.cat==="spa")return "spa"; if(i.cat==="fitness")return "pulse";
   if(/aquarium/.test(t))return "fish"; if(/pool/.test(t))return "waves"; if(/art|gallery/.test(t))return "frame"; if(/jazz|nightlife/.test(t))return "note";
   return "pin"; }
+const UNSPLASH=id=>`https://images.unsplash.com/photo-${id}?w=200&h=200&fit=crop`;
+const VENUE_PHOTO={
+  "Vespera":UNSPLASH("1551183053-bf91a1d81141"),
+  "The Terrace (on-property)":UNSPLASH("1533777324565-a040eb52facd"),
+  "Marea Room":UNSPLASH("1579871494447-9811cf80d66c"),
+  "After-hours gallery walk":UNSPLASH("1518998053901-5348d3961a04"),
+  "Cellar jazz set":UNSPLASH("1514320291840-2e0a9bf2a9ae"),
+  "Lotus Spa · Couples Ritual":UNSPLASH("1540555700478-4be289fbecef"),
+  "Senza":UNSPLASH("1595295333158-4742f28fbd85"),
+  "The Ridge Chophouse":UNSPLASH("1600891964092-4316c288032e"),
+  "Juniper Counter (on-property)":UNSPLASH("1509042239860-f550ce710b93"),
+  "Lakefront sunrise 5K":UNSPLASH("1476480862126-209bfaa8edc8"),
+  "Arena game night":UNSPLASH("1504450758481-7338eba7524a"),
+  "Lotus Fitness · 24h":UNSPLASH("1534438327276-14e5300c3a48"),
+  "Trattoria Bambini":UNSPLASH("1498579150354-977475b7ea0b"),
+  "Family Table (on-property)":UNSPLASH("1555396273-367ea4eb4db5"),
+  "Bay Aquarium early entry":UNSPLASH("1544552866-d3ed42536cfd"),
+  "Waterfront carousel stroll":UNSPLASH("1513889961551-628c1e5e2ee9"),
+  "Rooftop family pool hour":UNSPLASH("1571896349842-33c89424de2d")
+};
+function venuePhoto(i){ return VENUE_PHOTO[i.name] || PHOTO[photoKey(i)]; }
 function thumbHTML(i){
   const fb=dishSVG(i).replace(/"/g,"&quot;");
-  const url=PHOTO[photoKey(i)];
+  const url=venuePhoto(i);
   return `<div class="rthumb">${url?`<img src="${url}" alt="" loading="lazy" onerror="this.parentNode.innerHTML='${fb}'">`:dishSVG(i)}</div>`;
 }
 function recCard(i,val){
@@ -1386,7 +1407,7 @@ function renderFlavor(g,root){
     items=items.filter((v,i,a)=>a.findIndex(x=>x.name===v.name)===i);
     if(wx===2) items=items.filter(i=>!/walk|stroll|run|pool|trail/i.test(i.name+i.blurb)).concat(items); // rain: prefer indoor first
     items=items.slice(0, span==="short"?3:span==="eve"?4:6);
-    $("#bento").innerHTML=items.map((i,idx)=>`<div class="bt${idx===0?' big':''}" style="animation-delay:${idx*.05}s"><div class="bt-photo" style="background-image:url('${PHOTO[photoKey(i)]}')"></div><div class="cat">${i.cat}</div><div class="nm">${i.name}</div><div class="mt">${i.meta}</div>${idx===0?`<div class="wx">${WX[wx][0]}</div>`:""}</div>`).join("");
+    $("#bento").innerHTML=items.map((i,idx)=>`<div class="bt${idx===0?' big':''}" style="animation-delay:${idx*.05}s"><div class="bt-photo" style="background-image:url('${venuePhoto(i)}')"></div><div class="cat">${i.cat}</div><div class="nm">${i.name}</div><div class="mt">${i.meta}</div>${idx===0?`<div class="wx">${WX[wx][0]}</div>`:""}</div>`).join("");
   };
   root.innerHTML=`<p class="tsub">Compose a plan for ${firstName(g)} from what they love, the time they have, and today's conditions.</p>
     <div class="lf-top"><div class="lf-seg" id="lfSpan"><button data-s="short">2 hours</button><button data-s="half" class="on">Half day</button><button data-s="eve">Evening</button></div>
