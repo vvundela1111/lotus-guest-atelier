@@ -11,6 +11,7 @@ const crypto = require("crypto");
 const PORT = parseInt(process.env.BACKEND_PORT || "8787", 10);
 const PROVIDER = (process.env.AI_PROVIDER || "azure").toLowerCase();
 const API_KEY = process.env.AI_API_KEY || "";
+const AUTH_MODE = (process.env.AI_AUTH_MODE || (API_KEY ? "key" : "entra")).toLowerCase();
 const ENDPOINT = (process.env.AI_ENDPOINT || "").replace(/\/+$/, "");
 const DEPLOYMENT = process.env.AI_DEPLOYMENT || "";
 const API_VERSION = process.env.AI_API_VERSION || "2024-08-01-preview";
@@ -26,7 +27,33 @@ const SYSTEM_PROMPT = process.env.AI_SYSTEM_PROMPT ||
   "Ground every answer in the provided dossier; do not invent facts, allergies, or bookings. " +
   "Keep it under ~140 words, use short paragraphs or bullet points, and do not use markdown headers.";
 
-const configured = Boolean(API_KEY) && (PROVIDER === "openai" ? Boolean(MODEL) : Boolean(ENDPOINT && DEPLOYMENT));
+const configured = PROVIDER === "openai"
+  ? Boolean(API_KEY && MODEL)
+  : Boolean(ENDPOINT && DEPLOYMENT && (API_KEY || AUTH_MODE === "entra"));
+
+// ---- Keyless Entra ID auth via managed identity (Azure Container Apps) ----
+let _token = { value: null, exp: 0 };
+async function getEntraToken() {
+  const now = Date.now();
+  if (_token.value && now < _token.exp - 120000) return _token.value;
+  const resource = "https://cognitiveservices.azure.com";
+  const idEndpoint = process.env.IDENTITY_ENDPOINT;
+  const idHeader = process.env.IDENTITY_HEADER;
+  let url, headers;
+  if (idEndpoint && idHeader) {
+    url = `${idEndpoint}?resource=${encodeURIComponent(resource)}&api-version=2019-08-01`;
+    headers = { "X-IDENTITY-HEADER": idHeader };
+  } else {
+    url = `http://169.254.169.254/metadata/identity/oauth2/token?resource=${encodeURIComponent(resource)}&api-version=2018-02-01`;
+    headers = { "Metadata": "true" };
+  }
+  const resp = await fetch(url, { headers });
+  if (!resp.ok) throw new Error(`identity token ${resp.status}: ${(await resp.text().catch(() => "")).slice(0, 200)}`);
+  const j = await resp.json();
+  const ttl = parseInt(j.expires_in || "3600", 10) * 1000;
+  _token = { value: j.access_token, exp: now + (ttl > 0 ? ttl : 3600000) };
+  return _token.value;
+}
 
 // ---- Staff login (reuses the existing basic-auth secret by default) ----
 const STAFF_USER = process.env.STAFF_USER || process.env.BASIC_AUTH_USER || "lotus";
@@ -68,7 +95,12 @@ async function callModel(messages) {
     headers = { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` };
   } else {
     url = `${ENDPOINT}/openai/deployments/${DEPLOYMENT}/chat/completions?api-version=${API_VERSION}`;
-    headers = { "Content-Type": "application/json", "api-key": API_KEY };
+    if (API_KEY) {
+      headers = { "Content-Type": "application/json", "api-key": API_KEY };
+    } else {
+      const token = await getEntraToken();
+      headers = { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+    }
   }
   const payload = { messages, temperature: TEMPERATURE, max_tokens: MAX_TOKENS };
   if (PROVIDER === "openai") payload.model = MODEL;
