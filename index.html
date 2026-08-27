@@ -1708,6 +1708,15 @@ renderMetrics(); renderRoster(); renderScenarios(); renderChips(); renderCtx(); 
     if(!user||!pass){ return fail("Enter your staff ID and password."); }
     btn.disabled=true; btn.textContent="Signing in\u2026";
     const basic=btoa(user+":"+pass);
+    const demoReveal=()=>{
+      // No live backend (static host → 404, or network failure): allow the
+      // published demo credentials through so the presentation is never locked out.
+      if(user==="lotus" && pass==="lotus"){
+        window.__LOTUS_AUTH=basic;
+        try{ sessionStorage.setItem("lotus_auth",basic); }catch(_){}
+        reveal();
+      }else{ fail("Sign-in unavailable. Please try again."); }
+    };
     try{
       const r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user:user,pass:pass})});
       if(r.ok){
@@ -1715,14 +1724,9 @@ renderMetrics(); renderRoster(); renderScenarios(); renderChips(); renderCtx(); 
         try{ sessionStorage.setItem("lotus_auth",basic); }catch(_){}
         reveal();
       }else if(r.status===401){ fail("Invalid staff credentials."); }
-      else{ fail("Sign-in unavailable. Please try again."); }
+      else{ demoReveal(); } // 404 from a static host, 5xx, etc. — no live auth endpoint
     }catch(e){
-      // Backend unreachable — demo safety net for the known demo credentials.
-      if(user==="lotus" && pass==="lotus"){
-        window.__LOTUS_AUTH=basic;
-        try{ sessionStorage.setItem("lotus_auth",basic); }catch(_){}
-        reveal();
-      }else{ fail("Invalid staff credentials."); }
+      demoReveal(); // backend unreachable
     }
   });
 
