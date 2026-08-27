@@ -15,7 +15,8 @@ An AI-powered **Guest Personalization Assistant** for a boutique hotel chain —
 - **Natural-language concierge** — staff ask in plain English; the engine resolves intent and returns tailored recommendations, with **contextual follow-up suggestions** after every answer.
 - **Explainable by design** — every answer shows the **"Signals used"** (the exact profile cues behind it) plus a business **Impact** callout.
 - **Dietary safety guardrails** — celiac/nut-allergy guests can *never* be shown an unsafe venue (hard filter + visible "Risk-Siren").
-- **Light & dark themes** — a warm terracotta/clay design system (the "ATV" palette) with a one-click theme toggle that respects your OS preference.
+- **Light & dark themes** — a warm rose-pink design system (the "ATV" palette) with a one-click theme toggle that respects your OS preference.
+- **10 interactive "Atelier Tools"** — a launcher (press **T**) of visual, hands-on tools that turn guest data into action (storyboard, radar, dial, heatmap, constellation, and more).
 - **One-click guided demo** — presenter-ready "Begin demo" mode with scene labels, pause/step/restart, and keyboard shortcuts.
 
 ---
@@ -42,6 +43,29 @@ An AI-powered **Guest Personalization Assistant** for a boutique hotel chain —
 
 ---
 
+## Atelier Tools
+
+Press **T** (or the grid icon in the header) to open the **Atelier Tools** launcher — ten interactive, visual tools that turn the guest data into something staff can *act on*. Each is built from the same in-memory profiles, fully on-device.
+
+![Atelier Tools launcher](docs/screenshot-tools.png)
+
+| Tool | What it does |
+|---|---|
+| **Stay Storyboard** | The whole guest journey on one animated timeline (pre-arrival → checkout) with an "experience completeness" meter — drag cards to reschedule, tick them off as done. |
+| **Lobby Radar** | A calm live-arrivals board that places each guest in a lane by how urgently they need attention; hover a blip for their one thing. |
+| **Magic Handoff** | Folds a full dossier into a clean shift-change briefing the next team can read in seconds — with one-tap copy. |
+| **Delight Budget Dial** | Spin a radial dial to a budget/time tier and get guest-specific surprise ideas instantly. |
+| **Risk Heatmap** | Allergy, dietary, timing and service risk across every active guest, as a color-graded grid. |
+| **Room Match Constellation** | Pick a room and watch the guest's preferences light up the traits they connect to, with a live match score. |
+| **Guest Mood Mixer** | Set the mood with sliders and watch the greeting and recommended next actions adapt in real time. |
+| **Recovery Playbook** | Drop an incident on a guest to generate a tailored acknowledge → fix → delight → log plan. |
+| **Local Flavor Composer** | Composes a bento-style itinerary from interests, time available, and today's conditions — with a "surprise me" reshuffle. |
+| **Service Load Balancer** | Balances prep tasks across the team on a kanban board — drag to reassign and watch the workload rings update live. |
+
+![Room Match Constellation](docs/screenshot-constellation.png)
+
+---
+
 ## Running it
 
 **Simplest:** double-click `index.html` — it opens in your browser and works offline.
@@ -61,6 +85,7 @@ Click **▶ Begin demo** (or press **P**) to auto-run the scripted scenarios.
 | `1`–`5` | Jump to a scenario |
 | `P` | Start / stop the guided demo |
 | `W` | Walk-in intake |
+| `T` | Open the Atelier Tools launcher |
 | `Space` | Pause / resume the demo |
 | `→` | Skip to the next scene |
 | `R` | Restart the demo |
@@ -106,7 +131,7 @@ This app wasn't written in one pass. It was produced by a **multi-agent "build n
 - **UX system:** adapted from [ATV Design](https://github.com/All-The-Vibes/ATV-Design) using its warm editorial tokens, Fraunces/DM Sans typography, compact controls, layered surfaces, and responsive layout patterns.
 - **Data:** in-memory fictional profiles (no database, no persistence, no PII).
 - **AI:** a fully **on-device** rule/intent engine — no keys, no network, no data leaves the browser.
-- **Design:** the warm "ATV" design system (terracotta + clay + cream) with light/dark themes; Fraunces + DM Sans.
+- **Design:** the warm "ATV" design system (rose-pink accent on clay + cream) with light/dark themes; Fraunces + DM Sans.
 - **Out of scope (per the hackathon brief):** real PMS/booking integration, auth/RBAC, cloud deployment, mobile app.
 
 ### Success metrics it targets
