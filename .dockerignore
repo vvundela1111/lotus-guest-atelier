@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode
+.idea

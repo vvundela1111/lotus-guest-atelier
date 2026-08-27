@@ -98,6 +98,22 @@ Click the sun/moon toggle in the header (top-right) to switch themes. Your choic
 
 ![Dark mode](docs/screenshot-dark.png)
 
+### Azure Container Apps deployment
+The included `Dockerfile` serves the static app with Nginx on port `8080` and protects the site with HTTP Basic Auth. Configure these environment variables in the container app:
+
+| Variable | Description |
+|---|---|
+| `BASIC_AUTH_USER` | Login username. Defaults to `guest` when omitted. |
+| `BASIC_AUTH_PASSWORD` | Required password, stored as an Azure Container Apps secret. |
+
+Deploy with Azure CLI from the project folder:
+
+```powershell
+.\scripts\deploy-azure-container-app.ps1 -Subscription "<subscription name or id>"
+```
+
+The script creates a project-scoped resource group, Azure Container Registry, Container Apps environment, and Container App, then prints the app URL plus generated Basic Auth credentials.
+
 ---
 
 ## How it was built — the agent network
