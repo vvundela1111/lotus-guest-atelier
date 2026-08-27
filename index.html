@@ -502,6 +502,61 @@
 </style>
 </head>
 <body>
+<style>
+.login-screen{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(1200px 620px at 50% -12%, rgba(176,141,87,.18), transparent 62%), var(--paper,#f7f2ea);
+  transition:opacity .5s ease}
+.login-screen.hide{opacity:0;pointer-events:none}
+.login-card{width:min(412px,94vw);background:var(--card,#fffdf9);border:1px solid var(--line,#e7ded0);border-radius:20px;
+  padding:38px 34px 24px;box-shadow:0 40px 100px -42px rgba(40,28,16,.5);text-align:center;animation:lrise .5s ease both}
+@keyframes lrise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.login-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:26px}
+.login-brand .lotus{width:42px;height:42px;color:var(--brass,#b08d57)}
+.login-brand h1{font-size:22px;margin:0;letter-spacing:.3px;color:var(--text,#2a2018);font-family:Georgia,'Times New Roman',serif}
+.login-brand .sub{font-size:10px;letter-spacing:2.6px;text-transform:uppercase;color:var(--brass,#b08d57);margin-top:3px}
+.login-head{font-size:19px;font-weight:600;color:var(--text,#2a2018);margin-bottom:4px}
+.login-desc{font-size:13px;color:var(--muted,#8a7d6b);margin-bottom:22px}
+.login-form label{display:block;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted,#8a7d6b);font-weight:700;margin-bottom:14px}
+.login-form input{width:100%;margin-top:6px;padding:12px 14px;border:1px solid var(--line,#e7ded0);border-radius:11px;
+  background:var(--paper,#faf6ef);color:var(--text,#2a2018);font-size:15px;outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s}
+.login-form input:focus{border-color:var(--brass,#b08d57);box-shadow:0 0 0 3px rgba(176,141,87,.16)}
+.login-error{background:rgba(176,48,48,.1);color:#b03030;border:1px solid rgba(176,48,48,.25);border-radius:9px;padding:9px 12px;font-size:12.5px;margin-bottom:14px;text-align:left}
+.login-btn{width:100%;padding:13px;border:none;border-radius:11px;background:var(--text,#2a2018);color:#fff;font-size:14.5px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:transform .12s,opacity .15s}
+.login-btn:hover{transform:translateY(-1px)}
+.login-btn:disabled{opacity:.6;cursor:progress}
+.login-hint{margin-top:16px;font-size:11.5px;color:var(--brass,#b08d57)}
+.login-foot{margin-top:8px;font-size:10.5px;letter-spacing:.4px;color:var(--muted,#8a7d6b);opacity:.8}
+</style>
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <svg class="lotus" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M24 39c0-9 0-16 0-24"/>
+          <path d="M24 39c-6-3.5-9-9-10-16 5 2 8.5 7 10 16z"/>
+          <path d="M24 39c6-3.5 9-9 10-16-5 2-8.5 7-10 16z"/>
+          <path d="M24 39c-8-1.5-13-5-16-11 6-.5 12 2.5 16 11z"/>
+          <path d="M24 39c8-1.5 13-5 16-11-6-.5-12 2.5-16 11z"/>
+        </g>
+      </svg>
+      <div><h1>Lotus Hotels</h1><div class="sub">Guest Atelier</div></div>
+    </div>
+    <div class="login-head">Staff sign-in</div>
+    <div class="login-desc">Sign in to your concierge workspace.</div>
+    <form class="login-form" id="loginForm" autocomplete="on">
+      <label>Staff ID
+        <input id="loginUser" type="text" autocomplete="username" placeholder="Staff ID" required autofocus>
+      </label>
+      <label>Password
+        <input id="loginPass" type="password" autocomplete="current-password" placeholder="Password" required>
+      </label>
+      <div class="login-error" id="loginError" hidden></div>
+      <button class="login-btn" id="loginBtn" type="submit">Sign in</button>
+    </form>
+    <div class="login-hint">Demo access — <b>lotus</b> / <b>lotus</b></div>
+    <div class="login-foot">Authorized personnel only · Lotus Hospitality Group</div>
+  </div>
+</div>
 <div class="app">
   <header class="top">
     <div class="brand">
@@ -525,6 +580,9 @@
     <button class="hbtn theme-toggle" id="themeToggle" aria-label="Switch to dark mode" title="Toggle theme">
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
       <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1111.2 3a6.5 6.5 0 009.8 9.8z"/></svg>
+    </button>
+    <button class="hbtn" id="signoutBtn" aria-label="Sign out" title="Sign out" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
     </button>
   </header>
 
@@ -863,7 +921,61 @@ function buildAnswer(query){
 function finalize(g,html,sig){ return {guest:g, html: html + signalsBlock(sig)}; }
 function impactRow(list){ return `<div class="impact"><span class="ik">Impact</span>${list.map(s=>`<span class="imp">${s}</span>`).join("")}</div>`; }
 
-/* ============================ LLM (optional) ============================ */
+/* ============================ LLM (live concierge, optional) ============================ */
+/* Live AI is served by the in-container Node proxy at /api/chat. If it is not
+   configured or errors, ask() silently falls back to the on-device buildAnswer(). */
+let AI_AVAILABLE = false;
+(function probeAI(){
+  try{
+    fetch("/api/health",{headers:{"Accept":"application/json"}})
+      .then(r=>r.ok?r.json():null)
+      .then(j=>{ AI_AVAILABLE = !!(j && j.ok && j.configured); })
+      .catch(()=>{ AI_AVAILABLE=false; });
+  }catch(e){ AI_AVAILABLE=false; }
+})();
+
+function guestContext(g){
+  if(!g) return "";
+  try{
+    const p=[];
+    p.push(`Name: ${stripTags(g.name)}`);
+    if(g.tier) p.push(`Loyalty tier: ${g.tier} (${g.visits} stays)`);
+    if(g.property) p.push(`Property: ${g.property.name||""}, ${g.property.city||""}`);
+    if(g.occasion) p.push(`Occasion: ${g.occasion}`);
+    if(g.room) p.push(`Room preferences: ${stripTags(g.room.floor||"")}, ${g.room.temp||""}, bedding ${stripTags(g.room.bed||"")}, extras ${(g.room.extras||[]).join(", ")}`);
+    if(g.dietary) p.push(`Dietary: restrictions ${stripTags((g.dietary.restrictions||[]).join(", "))}${g.dietary.strict?" (STRICT allergy — hard safety constraint)":""}; loves ${(g.dietary.loves||[]).join(", ")}`);
+    if(g.interests) p.push(`Interests: ${(g.interests||[]).join(", ")}`);
+    if(g.notes && g.notes.length) p.push(`Staff notes: ${g.notes.map(n=>stripTags(n.t)).join(" | ")}`);
+    return p.join("\n");
+  }catch(e){ return stripTags((g&&g.name)||""); }
+}
+function aiTextToHTML(t){
+  let h=escapeHTML(String(t));
+  h=h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+  h=h.replace(/^\s*[-*]\s+(.*)$/gm,"&bull;&nbsp;$1");
+  h=h.replace(/\n{2,}/g,"<br><br>").replace(/\n/g,"<br>");
+  return h;
+}
+async function fetchAI(query,g){
+  if(!AI_AVAILABLE) return null;
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),22000);
+  try{
+    const headers={"Content-Type":"application/json"};
+    if(window.__LOTUS_AUTH) headers["Authorization"]="Basic "+window.__LOTUS_AUTH;
+    const r=await fetch("/api/chat",{
+      method:"POST",
+      headers:headers,
+      body:JSON.stringify({query:query, context:guestContext(g)}),
+      signal:ctrl.signal
+    });
+    clearTimeout(to);
+    if(!r.ok) return null;
+    const j=await r.json();
+    return (j && j.text && j.text.trim()) ? j.text.trim() : null;
+  }catch(e){ clearTimeout(to); return null; }
+}
+
 /* ============================ RENDER ============================ */
 function escapeHTML(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function addUser(text){
@@ -943,9 +1055,15 @@ async function ask(query){
   const cur=$(".curtain"); if(cur) $("#stream").innerHTML="";
   addUser(query); addTyping();
   const named=guestFromText(query); if(named && named.id!==activeGuest.id) setActive(named);
-  await sleep(360);
   const a=buildAnswer(query);
-  addAI(a.html, followups(a.guest, primaryIntent(query)));
+  const aiText = await fetchAI(query, a.guest);
+  if(aiText){
+    const badge=`<div style="font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brass);display:flex;align-items:center;gap:6px;margin-bottom:7px"><span style="width:6px;height:6px;border-radius:50%;background:#3fb17a;display:inline-block;box-shadow:0 0 0 3px rgba(63,177,122,.18)"></span>Live AI concierge</div>`;
+    addAI(badge+`<div class="live-ai">${aiTextToHTML(aiText)}</div>`+signalsBlock(a.guest.signals||[]), followups(a.guest, primaryIntent(query)));
+  }else{
+    await sleep(300);
+    addAI(a.html, followups(a.guest, primaryIntent(query)));
+  }
 }
 
 /* ---------- roster / panels ---------- */
@@ -1145,6 +1263,7 @@ function endPresent(done){
 function togglePresent(){ if(presenting) endPresent(false); else startPresent(); }
 $("#presentBtn").onclick=togglePresent;
 document.addEventListener("keydown",e=>{
+  if(!window.LOGGED_IN) return;
   if(presenting){
     if(e.key==="Escape"){ e.preventDefault(); endPresent(false); return; }
     if(e.key===" "){ e.preventDefault(); paused=!paused; banner(paused?"Guided run &middot; paused":"Guided run &middot; resumed"); return; }
@@ -1436,6 +1555,70 @@ function renderLoad(g,root){
 
 /* ---------- init ---------- */
 renderMetrics(); renderRoster(); renderScenarios(); renderChips(); renderCtx(); renderProfile(); renderCurtain();
+
+/* ---------- staff login gate ---------- */
+(function(){
+  const scr=document.getElementById("loginScreen");
+  const form=document.getElementById("loginForm");
+  const uEl=document.getElementById("loginUser");
+  const pEl=document.getElementById("loginPass");
+  const err=document.getElementById("loginError");
+  const btn=document.getElementById("loginBtn");
+  const signout=document.getElementById("signoutBtn");
+  if(!scr||!form) return;
+
+  function reveal(){
+    window.LOGGED_IN=true;
+    scr.classList.add("hide");
+    setTimeout(()=>{ scr.style.display="none"; }, 520);
+    if(signout) signout.hidden=false;
+    try{ const inp=document.getElementById("input"); if(inp) inp.focus(); }catch(e){}
+  }
+  function fail(msg){
+    err.textContent=msg||"Invalid staff credentials."; err.hidden=false;
+    btn.disabled=false; btn.textContent="Sign in";
+    pEl.value=""; pEl.focus();
+  }
+
+  try{
+    const saved=sessionStorage.getItem("lotus_auth");
+    if(saved){ window.__LOTUS_AUTH=saved; reveal(); }
+  }catch(e){}
+
+  form.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    err.hidden=true;
+    const user=(uEl.value||"").trim(); const pass=pEl.value||"";
+    if(!user||!pass){ return fail("Enter your staff ID and password."); }
+    btn.disabled=true; btn.textContent="Signing in\u2026";
+    const basic=btoa(user+":"+pass);
+    try{
+      const r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user:user,pass:pass})});
+      if(r.ok){
+        window.__LOTUS_AUTH=basic;
+        try{ sessionStorage.setItem("lotus_auth",basic); }catch(_){}
+        reveal();
+      }else if(r.status===401){ fail("Invalid staff credentials."); }
+      else{ fail("Sign-in unavailable. Please try again."); }
+    }catch(e){
+      // Backend unreachable — demo safety net for the known demo credentials.
+      if(user==="lotus" && pass==="lotus"){
+        window.__LOTUS_AUTH=basic;
+        try{ sessionStorage.setItem("lotus_auth",basic); }catch(_){}
+        reveal();
+      }else{ fail("Invalid staff credentials."); }
+    }
+  });
+
+  if(signout) signout.addEventListener("click", ()=>{
+    window.LOGGED_IN=false; window.__LOTUS_AUTH=null;
+    try{ sessionStorage.removeItem("lotus_auth"); }catch(e){}
+    signout.hidden=true;
+    scr.style.display="flex"; void scr.offsetWidth; scr.classList.remove("hide");
+    btn.disabled=false; btn.textContent="Sign in"; err.hidden=true;
+    uEl.value=""; pEl.value=""; uEl.focus();
+  });
+})();
 </script>
 </body>
 </html>
